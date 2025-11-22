@@ -6,17 +6,31 @@ import (
 )
 
 func main() {
-	ch := make(chan string)
+	done := make(chan struct{})
+	results := make(chan int)
 
-	go func(ch chan<- string) {
-		time.Sleep(500 * time.Millisecond)
-		ch <- "operation completed"
-	}(ch)
+	go func(results chan<- int, done <-chan struct{}) {
+		count := 0
 
-	select {
-	case msg := <-ch:
-		fmt.Println(msg)
-	case <-time.After(600 * time.Millisecond):
-		fmt.Println("operation took too long")
+		for {
+			time.Sleep(100 * time.Millisecond)
+			select {
+			case <-done:
+				return
+			case results <- count:
+				count += 1
+			}
+		}
+
+	}(results, done)
+
+	for range 5 {
+		fmt.Println(<-results)
 	}
+
+	close(done)
+
+	time.Sleep(10 * time.Millisecond)
+
+	fmt.Println("worker stopped")
 }

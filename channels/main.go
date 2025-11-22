@@ -1,27 +1,30 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func main() {
-	// The bidirectional chan int in main converts automatically when passed
-	ch := make(chan int)
+	ch1 := make(chan string)
+	ch2 := make(chan string)
 
-	go producer(ch)
+	go func(ch chan<- string) {
+		time.Sleep(100 * time.Millisecond)
+		ch <- "from channel 1"
+	}(ch1)
 
-	consumer(ch)
-}
+	go func(ch chan<- string) {
+		time.Sleep(200 * time.Millisecond)
+		ch <- "from channel 2"
+	}(ch2)
 
-// producer can only send and close (appropriate for a producer)
-func producer(ch chan<- int) {
-	for i := range 5 {
-		ch <- (i + 1)
-	}
-	close(ch)
-}
-
-// consumer can only receive (can't accidentally close or send)
-func consumer(ch <-chan int) {
-	for value := range ch {
-		fmt.Println(value)
+	for range 2 {
+		select {
+		case msg := <-ch1:
+			fmt.Println(msg)
+		case msg := <-ch2:
+			fmt.Println(msg)
+		}
 	}
 }

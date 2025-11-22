@@ -2,35 +2,35 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
+const numOfJobs = 5
+
 func main() {
-	done := make(chan struct{})
-	results := make(chan int)
+	jobs := make(chan int, 10)
+	results := make(chan int, 10)
 
-	go func(results chan<- int, done <-chan struct{}) {
-		count := 0
-
-		for {
-			time.Sleep(100 * time.Millisecond)
-			select {
-			case <-done:
-				return
-			case results <- count:
-				count += 1
-			}
-		}
-
-	}(results, done)
-
-	for range 5 {
-		fmt.Println(<-results)
+	for workerID := range 3 {
+		go worker(workerID, jobs, results)
 	}
 
-	close(done)
+	for num := range numOfJobs {
+		jobs <- (num + 1)
+	}
 
-	time.Sleep(10 * time.Millisecond)
+	close(jobs)
 
-	fmt.Println("worker stopped")
+	for range numOfJobs {
+		result := <-results
+		fmt.Printf("result: %d\n", result)
+	}
+
+	close(results)
+}
+
+func worker(workerID int, jobs <-chan int, results chan<- int) {
+	for job := range jobs {
+		fmt.Printf("worker %d is processing job %d\n", workerID, job)
+		results <- 2 * job
+	}
 }

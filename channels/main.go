@@ -1,55 +1,35 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"sync"
+	"time"
 )
 
 func main() {
-	var wg sync.WaitGroup
+	ctx, cancel := context.WithCancel(context.Background())
+	gen := generator(ctx)
+	for range 5 {
+		value := <-gen
+		fmt.Printf("%d\n", value)
+	}
+	cancel()
+}
 
-	results := make(chan int)
-
-	gen := generator()
-
-	for range 3 {
-		wg.Add(1)
-		sq := square(gen)
-		go func() {
-			defer wg.Done()
-			for s := range sq {
-				results <- s
+func generator(ctx context.Context) <-chan int {
+	out := make(chan int)
+	go func() {
+		defer close(out)
+		counter := 0
+		for {
+			time.Sleep(100 * time.Millisecond)
+			select {
+			case <-ctx.Done():
+				fmt.Printf("generator stopped\n")
+				return
+			case out <- counter:
+				counter += 1
 			}
-		}()
-	}
-
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	for result := range results {
-		fmt.Println(result)
-	}
-}
-
-func generator() <-chan int {
-	out := make(chan int)
-	go func() {
-		defer close(out)
-		for i := range 9 {
-			out <- (i + 1)
-		}
-	}()
-	return out
-}
-
-func square(generator <-chan int) <-chan int {
-	out := make(chan int)
-	go func() {
-		defer close(out)
-		for num := range generator {
-			out <- num * num
 		}
 	}()
 	return out

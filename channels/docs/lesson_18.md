@@ -1,7 +1,6 @@
 # Lesson 18: Worker Pool with Context and errgroup
 
-Concept: Combine worker pool with graceful shutdown and error handling. This is the production-ready pattern - workers respond to cancellation and
-errors propagate properly.
+Concept: Combine worker pool with graceful shutdown and error handling. This is the production-ready pattern - workers respond to cancellation and errors propagate properly.
 
 Your task:
 
@@ -79,5 +78,4 @@ err := g.Wait()
 // Check signalCtx.Err() vs err to determine cause
 ```
 
-Key learning: This pattern handles all shutdown scenarios cleanly - signals, errors, and normal completion. It's the foundation for production task
-processors, job queues, and server workers.
+Key learning: This pattern handles all shutdown scenarios cleanly - signals, errors, and normal completion. It's the foundation for production task processors, job queues, and server workers.

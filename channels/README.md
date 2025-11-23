@@ -16,9 +16,9 @@
 | 10     | Context for Cancellation          |
 | 11     | Context with Timeout and Deadline |
 
-For Lesson 12, here are some logical next topics that build on what you've learned:
+## Leftover lessons
 
-1. errgroup - Handle errors from multiple goroutines elegantly (builds directly on context)
-2. Rate Limiting - Use time.Ticker with channels to throttle operations
-3. Semaphores - Limit concurrent goroutines using buffered channels
-4. Graceful Shutdown - Combine OS signals with context for clean application termination
+Rate Limiting - Use time.Ticker with channels to throttle operations
+Semaphores - Limit concurrent goroutines using buffered channels
+Graceful Shutdown - Combine OS signals with context for clean application termination
+Select with multiple channels - More advanced select patterns (priority, non-blocking)

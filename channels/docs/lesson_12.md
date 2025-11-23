@@ -1,7 +1,8 @@
 # Lesson 12: Graceful Shutdown with OS Signals
 
-Concept: Production applications need to shut down cleanly when receiving termination signals (Ctrl+C, container stop, etc.). Go's `os/signal` package
-combined with context provides an elegant solution.
+## Concept
+
+Production applications need to shut down cleanly when receiving termination signals (Ctrl+C, container stop, etc.). Go's `os/signal` package combined with context provides an elegant solution.
 
 Your task:
 
@@ -37,7 +38,7 @@ for {
 }
 ```
 
-- Use `wg.Wait()` in main to ensure all workers finish before exiting │
+- Use `wg.Wait()` in main to ensure all workers finish before exiting
 
 ```txt
 worker 1: processing...

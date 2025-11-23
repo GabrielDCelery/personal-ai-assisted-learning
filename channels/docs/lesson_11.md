@@ -20,12 +20,16 @@ Hints:
 - Create timeout context: ctx, cancel := context.WithTimeout(context.Background(), 500\*time.Millisecond)
 - Always defer cancel() even if timeout fires (prevents resource leaks)
 - Use select to race between work completion and context cancellation:
-  select {
+
+```go
+select {
   case <-time.After(300 \* time.Millisecond):
-  return "operation completed", nil
+    return "operation completed", nil
   case <-ctx.Done():
-  return "", ctx.Err()
-  }
+   return "", ctx.Err()
+}
+```
+
 - ctx.Err() returns context.DeadlineExceeded for timeouts
 
 Expected output:

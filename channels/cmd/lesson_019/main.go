@@ -6,13 +6,12 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
 func main() {
 	signalCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
-
-	// Create cancellable context to stop pipeline on error
 	ctx, cancel := context.WithCancel(signalCtx)
 	defer cancel()
 
@@ -51,8 +50,7 @@ func mergeErrorChannels(ctx context.Context, errChansToMerge ...<-chan error) <-
 				select {
 				case <-ctx.Done():
 					return
-				default:
-					merged <- err
+				case merged <- err:
 				}
 			}
 		}(errChan)
@@ -73,6 +71,7 @@ func generator(ctx context.Context, nums []int) <-chan int {
 			case <-ctx.Done():
 				return
 			default:
+				time.Sleep(100 * time.Millisecond)
 				outChan <- num
 			}
 		}
@@ -96,6 +95,7 @@ func transform(ctx context.Context, inChan <-chan int) (<-chan int, <-chan error
 					errChan <- fmt.Errorf("transform error: number %d is invalid", num)
 					return
 				}
+				time.Sleep(100 * time.Millisecond)
 				outChan <- num * 2
 			}
 		}

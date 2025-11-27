@@ -54,7 +54,11 @@ func orDone(ctx context.Context, ch <-chan int) <-chan int {
 				if !ok {
 					return
 				}
-				out <- val
+				select {
+				case <-ctx.Done():
+					return
+				case out <- val:
+				}
 			}
 		}
 	}()
@@ -76,7 +80,11 @@ func merge(ctx context.Context, chs ...<-chan int) <-chan int {
 					if !ok {
 						return
 					}
-					merged <- val
+					select {
+					case <-ctx.Done():
+						return
+					case merged <- val:
+					}
 				}
 			}
 		}(ch)

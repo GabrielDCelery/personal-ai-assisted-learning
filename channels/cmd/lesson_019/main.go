@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -14,27 +15,54 @@ func main() {
 	genChan := generator(ctx, nums)
 	transChan, transErrChan := transform(ctx, genChan)
 	doneChan, saveErrChan := save(ctx, transChan)
+	mergedErrChan := mergeErrorChannels(ctx, transErrChan, saveErrChan)
+
 	for {
 		select {
-		case err, ok := <-transErrChan:
+		case err, ok := <-mergedErrChan:
 			if !ok {
-				transErrChan = nil
+				mergedErrChan = nil
 				continue
 			}
-			fmt.Printf("transform error: %v\n", err)
-			cancel()
-		case err, ok := <-saveErrChan:
-			fmt.Printf("save error: %v\n", err)
-			if !ok {
-				saveErrChan = nil
-				continue
-			}
+			fmt.Printf("error: %v\n", err)
 			cancel()
 		case <-doneChan:
 			fmt.Printf("finished processing\n")
 			return
 		}
 	}
+}
+
+func mergeErrorChannels(ctx context.Context, errChans ...<-chan error) <-chan error {
+	merged := make(chan error)
+
+	var wg sync.WaitGroup
+	wg.Add(len(errChans))
+
+	for _, errChan := range errChans {
+		go func(e <-chan error) {
+			defer wg.Done()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case err, ok := <-e:
+					if !ok {
+						return
+					}
+					merged <- err
+					return
+				}
+			}
+		}(errChan)
+	}
+
+	go func() {
+		defer close(merged)
+		wg.Wait()
+	}()
+
+	return merged
 }
 
 func generator(ctx context.Context, nums []int) <-chan int {
@@ -67,10 +95,10 @@ func transform(ctx context.Context, inChan <-chan int) (<-chan int, <-chan error
 				if !ok {
 					return
 				}
-				// if num == 6 {
-				// 	errChan <- fmt.Errorf("number %d is invalid", num)
-				// 	return
-				// }
+				if num == 6 {
+					errChan <- fmt.Errorf("number %d is invalid", num)
+					return
+				}
 				outChan <- num * 2
 			}
 		}

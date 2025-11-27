@@ -1,0 +1,89 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
+)
+
+func main() {
+	ctx, close := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	defer close()
+	g1 := generator(ctx)
+	g2 := generator(ctx)
+	g3 := generator(ctx)
+
+	merged := merge(ctx, orDone(ctx, g1), orDone(ctx, g2), orDone(ctx, g3))
+
+	for n := range merged {
+		fmt.Printf("received %d\n", n)
+	}
+
+	fmt.Printf("done\n")
+}
+
+func generator(ctx context.Context) <-chan int {
+	out := make(chan int)
+	go func() {
+		defer close(out)
+		nums := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+		for _, num := range nums {
+			time.Sleep(50 * time.Millisecond)
+			select {
+			case <-ctx.Done():
+				return
+			case out <- num:
+			}
+		}
+	}()
+	return out
+}
+
+func orDone(ctx context.Context, ch <-chan int) <-chan int {
+	out := make(chan int)
+	go func() {
+		defer close(out)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case val, ok := <-ch:
+				if !ok {
+					return
+				}
+				out <- val
+			}
+		}
+	}()
+	return out
+}
+
+func merge(ctx context.Context, chs ...<-chan int) <-chan int {
+	merged := make(chan int)
+	var wg sync.WaitGroup
+	wg.Add(len(chs))
+	for _, ch := range chs {
+		go func(<-chan int) {
+			defer wg.Done()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case val, ok := <-ch:
+					if !ok {
+						return
+					}
+					merged <- val
+				}
+			}
+		}(ch)
+	}
+	go func() {
+		defer close(merged)
+		wg.Wait()
+	}()
+	return merged
+}

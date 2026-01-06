@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-demo
+spec:
+  initContainers:
+    - name: wait-for-database
+      image: busybox
+      command: ["sh", "-c", "echo 'Waiting for database...'; sleep 10; echo 'Database ready'"]
+
+  containers:
+    - name: app
+      image: nginx
+      ports:
+        - containerPort: 80
+

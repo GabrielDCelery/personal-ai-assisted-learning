@@ -1,0 +1,30 @@
+apiVersion: v1
+
+kind: Pod
+
+metadata:
+  name: web-logger-pod
+
+spec:
+  containers:
+    # Main container: nginx web server
+    - name: nginx
+      image: nginx:1.25
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - name: shared-logs
+          mountPath: /var/log/nginx
+
+    # Sidecar container: log watcher
+    - name: log-watcher
+      image: busybox
+      command: ["sh", "-c", "tail -f /var/log/nginx/access.log"]
+      volumeMounts:
+        - name: shared-logs
+          mountPath: /var/log/nginx
+
+  # Shared volume between containers
+  volumes:
+    - name: shared-logs
+      emptyDir: {}

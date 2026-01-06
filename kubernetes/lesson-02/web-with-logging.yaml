@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-with-logging
+spec:
+  containers:
+    # Main application
+    - name: web-app
+      image: myapp:1.0
+      ports:
+        - containerPort: 8080
+      volumeMounts:
+        - name: shared-logs
+          mountPath: /var/log/app
+
+    # Sidecar: Log shipper
+    - name: log-shipper
+      image: fluent/fluentd:latest
+      volumeMounts:
+        - name: shared-logs
+          mountPath: /var/log/app
+          readOnly: true
+
+  # Shared volume
+  volumes:
+    - name: shared-logs
+      emptyDir: {}
+

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shared-volume-pod
+spec:
+  containers:
+    - image: busybox:latest
+      name: writer
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh", "-c", "while true; do date >> /data/log.txt; sleep 5; done"]
+      volumeMounts:
+        - mountPath: /data
+          name: shared-volume
+
+    - image: busybox:latest
+      name: reader
+      command: ["/bin/sh", "-c", "tail -f /data/log.txt"]
+      volumeMounts:
+        - mountPath: /data
+          name: shared-volume
+  volumes:
+    - name: shared-volume

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: env-test-pod
+spec:
+  containers:
+    - name: env-test-prod
+      image: busybox:latest
+      command: ["sh", "-c", "echo APP_NAME=$APP_NAME VERSION=$VERSION; sleep 3600"]
+      env:
+        - name: APP_NAME
+          value: "Myapp"
+        - name: VERSION
+          value: "1.0.0"
+

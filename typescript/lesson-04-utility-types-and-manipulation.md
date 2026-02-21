@@ -4,7 +4,13 @@ Master TypeScript's built-in utility types and advanced type manipulation techni
 
 ## Built-in Utility Types
 
+You find yourself writing the same type transformations over and over: "take this interface but make all properties optional," or "create a type with these exact keys." TypeScript's utility types are the standard library for type-level operations - pre-built, battle-tested, and universally understood.
+
+Learning these isn't just about saving keystrokes. When you use `Partial<User>` instead of manually marking each property optional, you're writing self-documenting code that other developers instantly recognize. These utilities are the building blocks for more complex type manipulations - master them and you'll understand how TypeScript's type system really works.
+
 ### Partial<T>
+
+You have a User interface with 10 required fields. Your update function should accept ANY subset of those fields - maybe just the email, maybe email and age, whatever. Without `Partial`, you'd duplicate the interface and mark everything optional. With `Partial`, one line does it all.
 
 Makes all properties optional.
 
@@ -35,6 +41,8 @@ type Partial<T> = {
 
 ### Required<T>
 
+The flip side of Partial. You have configuration with optional fields and defaults, but deep in your validation logic you need to ensure ALL fields are set. `Required` transforms optional properties to required, giving you compile-time proof everything is present.
+
 Makes all properties required (opposite of Partial).
 
 ```typescript
@@ -61,6 +69,8 @@ type Required<T> = {
 
 ### Readonly<T>
 
+Immutability isn't just a best practice - it prevents bugs. Pass a config object to a function and you don't want it mutating your data. `Readonly` makes all properties read-only at compile time. The runtime object can still be mutated (JavaScript limitation), but TypeScript prevents accidental mutations in your code.
+
 Makes all properties readonly.
 
 ```typescript
@@ -85,6 +95,8 @@ type Readonly<T> = {
 ```
 
 ### Pick<T, K>
+
+Your User type has password, security questions, and other sensitive fields. Your API returns public user data - just id, name, and email. Instead of maintaining a duplicate PublicUser interface that drifts out of sync, `Pick` selects exactly the fields you need from the source of truth.
 
 Selects subset of properties.
 
@@ -118,6 +130,8 @@ type Pick<T, K extends keyof T> = {
 
 ### Omit<T, K>
 
+Sometimes it's easier to say what you DON'T want. "Give me the User type except for the password." `Omit` is the inverse of `Pick` - exclude specific properties instead of including them. Particularly useful when you have many fields to keep and few to remove.
+
 Removes properties (opposite of Pick).
 
 ```typescript
@@ -141,6 +155,8 @@ type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 ```
 
 ### Record<K, T>
+
+You need an object mapping user roles to permissions. TypeScript's `{ [key: string]: Permissions }` allows ANY string key, so typos silently create new entries. `Record<Role, Permissions>` locks down the exact keys allowed, catching `permissions.superadmin` at compile time when `superadmin` isn't in your Role union.
 
 Creates object type with keys K and values T.
 
@@ -172,6 +188,8 @@ type Record<K extends keyof any, T> = {
 
 ### Exclude<T, U>
 
+Your API can return `'success' | 'error' | 'pending' | null`. But in a specific function, you've already handled null and pending - you only care about success/error. `Exclude` removes unwanted members from a union type, giving you a narrower type to work with.
+
 Removes types from union.
 
 ```typescript
@@ -194,6 +212,8 @@ type Exclude<T, U> = T extends U ? never : T;
 
 ### Extract<T, U>
 
+The opposite of Exclude - keep only the union members you want. Your type is `string | number | (() => void)` but you need just the functions. `Extract<Mixed, Function>` filters to only the function type. Think of it as "intersection" for union types.
+
 Keeps only types assignable to U.
 
 ```typescript
@@ -212,6 +232,8 @@ type Extract<T, U> = T extends U ? T : never;
 ```
 
 ### ReturnType<T>
+
+Your colleague wrote a function that returns a complex object. You need to work with that same type in your code. Instead of duplicating the interface, `ReturnType` extracts it automatically. Change the function's return value and your types update automatically - single source of truth.
 
 Extracts function return type.
 
@@ -240,6 +262,8 @@ type ReturnType<T extends (...args: any) => any> =
 
 ### Parameters<T>
 
+You're wrapping a function - calling it with the same arguments plus some logging. TypeScript's rest parameters (`...args: any[]`) lose all type safety. `Parameters` extracts the exact parameter types as a tuple, letting you forward arguments with full type checking.
+
 Extracts function parameter types as tuple.
 
 ```typescript
@@ -265,6 +289,8 @@ type Parameters<T extends (...args: any) => any> =
 
 ### Awaited<T>
 
+Async/await made Promises easier, but the types got tricky. `ReturnType<typeof fetchUser>` gives you `Promise<User>`, not `User`. You need to unwrap the Promise. `Awaited` does this recursively, even handling `Promise<Promise<T>>` from badly typed code.
+
 Unwraps Promise type (TypeScript 4.5+).
 
 ```typescript
@@ -285,6 +311,8 @@ type User = Awaited<ReturnType<typeof fetchUser>>;
 ```
 
 ## Mapped Types
+
+Utility types are pre-built transformations. Mapped types let you BUILD your own. Need to make every property nullable? Turn every value into an array? Add prefixes to all keys? Mapped types iterate over properties and transform them according to your rules. This is how TypeScript's utility types are implemented - once you master mapped types, you can create custom utilities for your specific needs.
 
 Create new types by transforming properties.
 
@@ -325,6 +353,8 @@ type Concrete<T> = {
 
 ### Key Remapping (TypeScript 4.1+)
 
+The `as` clause in mapped types is a superpower. You can not only transform values but also the KEYS themselves. Generate getter methods? Add prefixes? Filter out certain keys? Key remapping turns property manipulation into key manipulation. This unlocks patterns like auto-generating DTOs, API types, and ORM models from a single source.
+
 ```typescript
 // Prefix all keys with 'get'
 type Getters<T> = {
@@ -364,6 +394,10 @@ type NonNumbers = OmitType<Data, number>;
 
 ## Conditional Types
 
+Types can make decisions. "If T is a string, return X, otherwise return Y." This enables type-level logic - the same kind of branching you do at runtime, but at compile time. Conditional types power TypeScript's most advanced features: ReturnType, mapped type filtering, and recursive type definitions.
+
+The real power comes from combining conditionals with `infer` to extract and manipulate types. Once you grasp this, you can write types that feel like functions - taking types as input and producing new types as output.
+
 Types that depend on conditions.
 
 ### Basic Conditional
@@ -385,6 +419,8 @@ type Result = ToArray<string | number>;
 ```
 
 ### Infer Keyword
+
+Here's where type manipulation gets wild. `infer` lets you declare type variables WITHIN a conditional check. "If T is an array, extract and capture the element type." You're pattern matching on types and pulling out the pieces you need. It's how ReturnType works, how you unwrap Promises, and how you can parse complex types at compile time.
 
 Extract types from within other types.
 
@@ -435,6 +471,10 @@ type PartialNested = DeepPartial<Nested>;
 ```
 
 ## Template Literal Types
+
+Types can now manipulate strings like runtime code manipulates values. Build API route types from method + path. Generate event handler names from event types. Validate CSS units. Template literal types bring string manipulation to the type level, enabling incredibly precise typing for string-heavy domains like routing, CSS-in-JS, and configuration.
+
+Combined with unions, they explode into cartesian products - `${Method} ${Route}` generates every possible combination. This creates type-safe DSLs that catch typos and enforce patterns without runtime overhead.
 
 String manipulation at type level (TypeScript 4.1+).
 
@@ -606,6 +646,8 @@ emitter.emit('click', { x: 10 });         // ❌ Error: missing y
 
 ### Q1: Difference between Pick and Omit?
 
+A fundamental question that tests whether you understand type manipulation strategies. It also reveals whether you think about API design - when to be explicit about inclusion versus exclusion. The follow-up often is "which would you use for this specific case?"
+
 <details>
 <summary>Answer</summary>
 
@@ -632,6 +674,8 @@ type B = Omit<User, 'email'>;          // { id, name }
 
 ### Q2: How does `infer` work?
 
+This separates developers who memorize syntax from those who understand the type system. `infer` is advanced - it's how you build types that extract and manipulate other types. Shows you can work with conditional types and understand pattern matching at the type level.
+
 <details>
 <summary>Answer</summary>
 
@@ -653,6 +697,8 @@ Only valid in `extends` clause of conditional types.
 </details>
 
 ### Q3: What's distributive conditional type?
+
+Advanced type system knowledge. Tests whether you understand how TypeScript processes unions in conditional types. Most developers don't know this explicitly but run into the behavior. Understanding distribution helps you predict type behavior and avoid surprises when working with unions.
 
 <details>
 <summary>Answer</summary>
@@ -676,6 +722,8 @@ type Result2 = ToArrayNonDist<string | number>;
 </details>
 
 ### Q4: How to make all properties of nested objects optional?
+
+This tests recursion understanding - can you write a type that calls itself? Also shows whether you've dealt with complex object shapes in real code. The naive answer is wrong (only makes top level optional). The correct answer handles arbitrary nesting.
 
 <details>
 <summary>Answer</summary>

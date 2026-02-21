@@ -55,6 +55,22 @@ Peer dependencies solve this by saying "I need React to work, but I expect YOU (
 
 **Why?** Prevents version conflicts. If your library bundled React, users would have two React copies.
 
+What happens if a peer dependency is out of date?
+
+It should fail and block the installation. There are three workarounds:
+
+1. `npm install --legacy-peer-deps` - installs the peer dependency separately
+2. `npm install --force` - force installs despite errors (not recommended)
+3. fix peer dependency declaration, e.g.
+
+```json
+{
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0"
+  }
+}
+```
+
 ## Semver (Semantic Versioning)
 
 You depend on a library at version 1.4.2. The maintainer releases 1.4.3 with a critical security fix. Should your app automatically get it? What about 1.5.0 with new features? Or 2.0.0 that completely changes the API?

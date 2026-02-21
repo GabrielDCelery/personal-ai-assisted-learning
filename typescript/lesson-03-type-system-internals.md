@@ -4,7 +4,9 @@ Understanding how TypeScript's type system works under the hood - inference, nar
 
 ## Type Inference
 
-TypeScript infers types automatically. Understanding when and how helps write better code.
+You could annotate every variable: `const x: number = 42`. But that's verbose and defeats the point of TypeScript. The compiler is smart enough to figure out types from your code. The question is: when does it infer, what does it infer, and when do you need to step in?
+
+Understanding inference isn't just about writing less code - it's about knowing when TypeScript's guess matches your intent. Sometimes it infers `string` when you need `"success" | "error"`. Sometimes it widens when you need precision. Knowing the rules means you can work with the type system instead of fighting it.
 
 ### Basic Inference
 
@@ -21,6 +23,8 @@ let b = undefined;    // Type: any (!)
 
 ### Best Common Type
 
+When you have an array with different types, what should TypeScript infer? If you have `[new Dog(), new Cat()]`, both extend `Animal`, so you might expect `Animal[]`. But TypeScript doesn't assume parent types - it uses the union of what it sees: `(Dog | Cat)[]`. This is more precise but sometimes surprising. Understanding this helps you know when to explicitly type and when to let inference work.
+
 ```typescript
 let arr = [1, 2, 'three'];  // Type: (number | string)[]
 
@@ -34,6 +38,8 @@ let animals = [new Dog(), new Cat()];  // Type: (Dog | Cat)[]
 ```
 
 ### Contextual Typing
+
+Not all inference flows left-to-right from values. Sometimes TypeScript infers from WHERE you use a value. In `addEventListener('click', (e) => ...)`, you didn't type `e`, but TypeScript knows the callback signature from the `addEventListener` overload. This "backwards" inference from context is powerful - it means less manual typing and more automatic correctness.
 
 ```typescript
 // Type inferred from context
@@ -54,7 +60,9 @@ function double(x: number) {
 
 ## Type Widening
 
-TypeScript "widens" literal types to make them more general.
+You write `let status = 'success'` and TypeScript infers `string`, not the literal `"success"`. Why? Because `let` means reassignable - you might later do `status = 'error'`. So TypeScript widens the literal to the general type to allow flexibility.
+
+This is usually helpful, but sometimes you WANT the literal type - like when defining a discriminated union or a constant configuration. That's where `const` and `as const` come in. Understanding widening helps you control when TypeScript is precise versus flexible.
 
 ```typescript
 // Widening
@@ -77,6 +85,8 @@ const obj3 = { x: 1 } as const;  // Type: { readonly x: 1 }
 
 ### Interview Question: const vs as const
 
+Here's a common gotcha: `const obj = { x: 1 }` doesn't give you literal types for the properties. `const` prevents reassigning the BINDING (can't do `obj = {...}`), but the object itself is mutable. So `x` stays `number`, not `1`. For deep immutability and literal types, you need `as const`. This comes up constantly in config objects and discriminated unions.
+
 ```typescript
 const config = {
   apiUrl: 'https://api.example.com',
@@ -97,7 +107,9 @@ config2.timeout = 10000;  // ❌ Error: readonly
 
 ## Type Narrowing
 
-TypeScript refines types based on control flow analysis.
+You have a value that's `string | number`. Inside an `if (typeof value === 'string')` block, TypeScript knows it's a string. Outside, it's still the union. This isn't magic - it's control flow analysis. TypeScript tracks your runtime checks and refines types based on what's possible in each code path.
+
+Narrowing is how you work with union types safely. Without it, every union would require type assertions. With it, your runtime checks double as compile-time proofs. Master narrowing techniques and you'll write cleaner, safer code with fewer `as` casts.
 
 ### typeof Guards
 
@@ -151,6 +163,8 @@ function move(animal: Fish | Bird) {
 
 ### Discriminated Unions (Tagged Unions)
 
+The gold standard for type-safe unions. Add a literal `kind` or `type` field that's unique per variant, and TypeScript can narrow perfectly. Check `if (result.kind === 'success')` and TypeScript knows it's the Success variant with the `data` field. No type casts needed. This pattern is everywhere in production TypeScript - API responses, state machines, Redux actions. Learn this well.
+
 ```typescript
 interface Success {
   kind: 'success';
@@ -172,6 +186,8 @@ function handle(result: Result) {
 ```
 
 ### Truthiness Narrowing
+
+Using `if (str)` to check for `string | null` works, but has a gotcha: empty string `''` is falsy. So `if (str)` excludes both `null` AND empty strings. Sometimes that's what you want. Often it's not. Be explicit with `!== null` when you need to allow falsy values. This bug ships to production all the time - user enters empty string, your code treats it as missing data.
 
 ```typescript
 function printLength(str: string | null) {
@@ -200,6 +216,8 @@ function printLength3(str: string | null) {
 
 ### Custom Type Guards
 
+Built-in narrowing (typeof, instanceof) only goes so far. What about validating an API response or checking a complex shape? Type guards with the `is` keyword let you write custom narrowing logic. The function returns a boolean, but TypeScript trusts the `obj is User` annotation and narrows accordingly. It's a contract: you promise the check is correct, TypeScript uses it for narrowing.
+
 ```typescript
 interface User {
   name: string;
@@ -225,6 +243,8 @@ function greet(data: unknown) {
 
 ### Assertion Functions
 
+Type guards narrow inside an if-block. Assertion functions narrow AFTER the call - because if the check fails, they throw. Write `assertIsString(value)` and if execution continues, TypeScript knows `value` is a string. No if-block needed. This is cleaner for invariants: "this should never be null, throw if it is." The `asserts` keyword tells TypeScript about the throw behavior.
+
 ```typescript
 function assert(condition: any, msg?: string): asserts condition {
   if (!condition) {
@@ -247,7 +267,9 @@ function process(value: string | number) {
 
 ## Structural Typing (Duck Typing)
 
-TypeScript uses structural typing, not nominal typing.
+Coming from Java or C#, this feels weird. Two interfaces with identical properties are interchangeable in TypeScript, even if they have different names. It's not about what you CALL a type, it's about what SHAPE it has. "If it walks like a duck and quacks like a duck..."
+
+This matches JavaScript's runtime behavior - objects are just bags of properties. TypeScript mirrors this at compile time. It enables flexibility but can allow unintended compatibility. Understanding structural typing explains why seemingly unrelated types are sometimes assignable.
 
 ### Structural vs Nominal
 
@@ -271,6 +293,10 @@ const vec: Vector = point;  // ✓ Compatible (same structure)
 ```
 
 ### Excess Property Checking
+
+Structural typing says "extra properties are fine - you have everything needed." But that would miss typos. Write `{ urll: 'typo' }` for a `{ url: string }` type and structural typing would allow it. The typo'd property is ignored, but your bug persists.
+
+Excess property checking is TypeScript's compromise: for object LITERALS specifically, reject unknown properties. This catches typos at the call site. But assign to a variable first? That bypasses the check because it's no longer a literal. Quirky, but prevents common mistakes.
 
 ```typescript
 interface Config {
@@ -323,11 +349,15 @@ const dog2: Dog = animal2;  // ❌ Error: missing 'breed'
 
 ## Variance
 
-Understanding how types relate in generic positions.
+This is where type theory meets practice. If `Dog extends Animal`, is `Array<Dog>` assignable to `Array<Animal>`? What about `Handler<Animal>` to `Handler<Dog>`? The answer depends on whether the type parameter is in a read position (covariant), write position (contravariant), or both (invariant).
+
+Most developers never learn the formal terms, but you FEEL the effects when function types don't assign the way you expect. Understanding variance explains those moments and helps you design better APIs. It's also a common interview topic for senior positions.
 
 ### Covariance (Most Common)
 
-**Read-only positions** are covariant.
+Reading from an `Array<Dog>` and expecting an `Animal`? Totally safe - every Dog IS an Animal. So `Dog[]` can be used where `Animal[]` is expected. This is covariance: the type relationship preserves direction (Dog → Animal means Dog[] → Animal[]).
+
+Arrays, Promises, and most read-only generics are covariant. It feels natural because reading more specific data (Dog) as less specific (Animal) is always safe.
 
 ```typescript
 interface Animal {
@@ -353,7 +383,9 @@ const animal: Animal = animals[0];  // ✓ Dog is Animal
 
 ### Contravariance (Function Parameters)
 
-**Write-only positions** are contravariant.
+This is the mind-bender. A function expecting `Dog` can use a handler that accepts `Animal`? Yes! The handler gets Dogs (which are Animals), so it's safe. But the reverse breaks: an `Animal` handler that calls `.breed` would crash on a Cat.
+
+The type relationship REVERSES for function parameters (Dog → Animal means Handler<Animal> → Handler<Dog>). This is contravariance. It's unintuitive until you think through the safety: broader inputs are safer, narrower inputs are risky. Enable `strictFunctionTypes` to enforce this correctly.
 
 ```typescript
 type Func<T> = (arg: T) => void;
@@ -551,6 +583,8 @@ f2 = f1;  // ✓ Allowed (contravariance)
 
 ### Q1: What's type widening?
 
+This tests whether you understand TypeScript's inference rules versus just "types appear automatically." Knowing widening shows you've debugged issues where literals were needed but weren't inferred, and understand the difference between `let` and `const` at the type level.
+
 <details>
 <summary>Answer</summary>
 
@@ -571,6 +605,8 @@ z = 'world';  // ❌ Error
 </details>
 
 ### Q2: Explain structural vs nominal typing
+
+Fundamental to understanding TypeScript's type system. Coming from nominal languages (Java, C#), developers are surprised when unrelated types are compatible. This question reveals whether you understand WHY TypeScript chose structural typing (JavaScript compatibility) and can explain the tradeoffs. Senior-level question.
 
 <details>
 <summary>Answer</summary>
@@ -601,6 +637,8 @@ TypeScript chose structural for JavaScript's duck-typed nature.
 
 ### Q3: How do discriminated unions work?
 
+This is THE pattern for type-safe unions in production TypeScript. If you don't know discriminated unions, you probably haven't worked on a real TypeScript codebase. Shows you understand practical type narrowing, not just theoretical knowledge. Often followed up with "show me an example from your code."
+
 <details>
 <summary>Answer</summary>
 
@@ -625,6 +663,8 @@ TypeScript narrows based on the discriminant (`kind`).
 </details>
 
 ### Q4: What's the difference between type predicates and assertion functions?
+
+These are both custom narrowing techniques but with different control flow. Knowing both shows you've done non-trivial type validation. The interviewer wants to see if you understand HOW narrowing works (control flow analysis) versus just memorizing syntax. Good follow-up: "When would you use each?"
 
 <details>
 <summary>Answer</summary>
@@ -655,6 +695,8 @@ x.toUpperCase();  // Type: string (if we reach here)
 </details>
 
 ### Q5: Explain function parameter contravariance
+
+This is the variance question that actually comes up in practice - functions. If you can explain WHY handler types work this way, you deeply understand TypeScript's type system. Many senior developers can't answer this. It also tests `strictFunctionTypes` knowledge, which many teams don't enable (and should).
 
 <details>
 <summary>Answer</summary>

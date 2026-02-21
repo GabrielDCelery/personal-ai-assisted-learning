@@ -4,6 +4,8 @@ Critical knowledge about package.json for TypeScript developers - dependency man
 
 ## Dependency Types
 
+When you install a package, npm needs to know: "Should this be installed when someone uses my package? When they develop it? Should they provide it themselves?" Getting this wrong means bloated bundles, missing dependencies at runtime, or version conflicts that break your app. Each dependency type tells npm a different story about how your package relates to its dependencies.
+
 | Type | When to Use | Installed | Bundled |
 |------|-------------|-----------|---------|
 | `dependencies` | Runtime requirements | Always | Yes (if published) |
@@ -28,7 +30,9 @@ Critical knowledge about package.json for TypeScript developers - dependency man
 
 ### Peer Dependencies Deep Dive
 
-**Use case**: Your library extends/plugins into another library.
+Imagine you're building a React component library. If you bundle React as a regular dependency, every app using your library ends up with TWO copies of React - theirs and yours. This doesn't just waste space; React literally breaks because it relies on singleton state for its reconciliation algorithm. Two React instances = cryptic errors and broken hooks.
+
+Peer dependencies solve this by saying "I need React to work, but I expect YOU (the app) to provide it." This way, there's only one React instance, your library uses whatever version the app has, and everyone shares the same copy.
 
 ```json
 {
@@ -52,6 +56,10 @@ Critical knowledge about package.json for TypeScript developers - dependency man
 **Why?** Prevents version conflicts. If your library bundled React, users would have two React copies.
 
 ## Semver (Semantic Versioning)
+
+You depend on a library at version 1.4.2. The maintainer releases 1.4.3 with a critical security fix. Should your app automatically get it? What about 1.5.0 with new features? Or 2.0.0 that completely changes the API?
+
+Semantic versioning and version ranges solve this by encoding meaning into version numbers. The format tells you what changed, and range operators (`^`, `~`) let you automatically get safe updates while blocking breaking changes. Get this right and your dependencies stay secure and up-to-date. Get it wrong and your app breaks on `npm install`.
 
 Format: `MAJOR.MINOR.PATCH` (e.g., `1.4.2`)
 
@@ -79,6 +87,10 @@ Format: `MAJOR.MINOR.PATCH` (e.g., `1.4.2`)
 
 ### Lock Files
 
+"Works on my machine" isn't just about code - it's about dependencies too. Your package.json says `"lodash": "^4.17.0"`, which could resolve to 4.17.15 on your machine today and 4.17.21 on CI tomorrow. If 4.17.21 has a bug, your builds suddenly fail and nobody knows why.
+
+Lock files freeze the ENTIRE dependency tree - every package, every transitive dependency, down to the exact version and download URL. This means your teammate, your CI server, and production all get the exact same dependency versions you tested with. No surprises, no "but it worked yesterday."
+
 | File | Manager | Purpose |
 |------|---------|---------|
 | `package-lock.json` | npm | Locks exact dependency tree |
@@ -89,7 +101,9 @@ Format: `MAJOR.MINOR.PATCH` (e.g., `1.4.2`)
 
 ## Entry Points for Publishing
 
-Modern packages need multiple entry points for different environments.
+Here's the nightmare: Node.js uses CommonJS. Browsers use ESM. Bundlers want ESM for tree-shaking. TypeScript needs `.d.ts` files. Your library needs to work everywhere.
+
+The old solution was to pick one format and let tools figure it out. The modern solution is to provide EVERYTHING - CommonJS for old Node, ESM for modern Node and bundlers, and TypeScript types - and let the environment pick what it needs. The `exports` field is the control panel that makes this work, telling each consumer exactly which file to load based on how they're importing your package.
 
 ```json
 {
@@ -125,6 +139,8 @@ Modern packages need multiple entry points for different environments.
 
 ### Export Conditions Order Matters
 
+Tools read the `exports` object from top to bottom and use the first condition they understand. Put `types` first so TypeScript finds your type definitions before trying to infer types from JavaScript. Put `import` before `require` to give ESM precedence. The `default` at the end catches everything else. Wrong order means TypeScript might skip your types or Node might load the wrong module format.
+
 ```json
 {
   "exports": {
@@ -139,6 +155,10 @@ Modern packages need multiple entry points for different environments.
 ```
 
 ### Subpath Exports
+
+Before `exports`, users could reach into your package and import ANY file: `import secret from 'my-lib/src/internal/secret.js'`. If you refactor and move that file, their code breaks. If it was never meant to be public, tough luck - it's now part of your public API forever.
+
+Subpath exports give you control. You explicitly list what's importable. Everything else is blocked. This lets you refactor internals freely, prevent users from depending on implementation details, and design a clean public API. It's encapsulation for npm packages.
 
 ```json
 {
@@ -219,6 +239,10 @@ import foo from 'my-library/internal/foo'; // ❌ Error!
 
 ## Scripts & Lifecycle Hooks
 
+You're about to publish your package. Did you build it? Did you run tests? Did you update the changelog? Relying on memory for this checklist is how broken packages get published.
+
+Lifecycle hooks automate the checklist. `prepublishOnly` runs your build and tests before npm lets you publish. `prepare` ensures git dependencies get compiled after install. You codify the workflow once, and npm enforces it forever. No more "oops, forgot to build" moments after publishing.
+
 ### Common Scripts
 
 ```json
@@ -255,6 +279,10 @@ npm publish:
 
 ### Publishing Workflow
 
+The difference between `prepublishOnly` and `prepare` trips up even experienced developers. Here's the scenario: someone installs your package directly from GitHub (not npm). If you only use `prepublishOnly`, the TypeScript source never gets compiled - they get raw `.ts` files and your package breaks.
+
+`prepare` runs on BOTH `npm publish` AND `npm install` from git, ensuring compilation happens whenever needed. `prepublishOnly` runs ONLY on publish, making it perfect for checks that should block publishing (like tests) but don't need to run for git installs.
+
 ```json
 {
   "scripts": {
@@ -276,6 +304,10 @@ npm publish:
 - `prepare`: Before `npm publish` AND after `npm install` (useful for git dependencies)
 
 ## Package Types
+
+Node.js has a problem: `.js` files are ambiguous. Is `export const foo = 'bar'` in `index.js` valid? Depends on whether you're using ESM or CommonJS. For years, Node assumed CommonJS. Now with ESM support, it needs to know which syntax to expect.
+
+The `type` field in package.json is the signal. `"type": "module"` means "treat .js files as ESM". `"type": "commonjs"` (or omitting it) means "treat .js as CommonJS". No more ambiguity. Extensions like `.mjs` and `.cjs` override this on a per-file basis when you need to mix both in one project.
 
 ```json
 {
@@ -409,6 +441,8 @@ Create package.json for a library that supports both ESM and CommonJS.
 
 ### Q2: Why use peerDependencies instead of dependencies?
 
+Interviewers ask this to see if you understand package architecture and have published libraries (not just apps). It reveals whether you know the difference between building something standalone versus building something that plugs into an ecosystem. The answer shows you've dealt with the pain of dependency conflicts in real projects.
+
 <details>
 <summary>Answer</summary>
 
@@ -432,6 +466,8 @@ Your library requires React ^18.0.0 (peer)
 
 ### Q3: What's the purpose of the "exports" field?
 
+This question tests whether you're keeping up with modern npm practices. The `exports` field is relatively new (Node 12+) and many developers still use the old `main` field. Knowing `exports` signals you understand dual-package publishing, encapsulation, and the ESM transition - all critical for publishing production packages.
+
 <details>
 <summary>Answer</summary>
 
@@ -453,6 +489,8 @@ Your library requires React ^18.0.0 (peer)
 </details>
 
 ### Q4: When does "prepare" script run vs "prepublishOnly"?
+
+This catches developers who've only worked on apps (where build happens locally) versus publishing libraries (where builds need to happen for consumers too). It's a subtle distinction that causes real bugs when packages don't build correctly from git dependencies. Shows you've debugged "package works from npm but breaks from git" issues.
 
 <details>
 <summary>Answer</summary>

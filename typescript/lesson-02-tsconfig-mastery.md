@@ -6,6 +6,10 @@ Deep dive into TypeScript compiler configuration - the options that matter for p
 
 ### Strict Type Checking
 
+TypeScript without strict mode is JavaScript with autocomplete. It lets `null` slip through as strings, allows `any` to spread like wildfire, and won't catch when you call a function with wrong arguments. These aren't just theoretical issues - they're production bugs waiting to happen.
+
+Strict mode flips TypeScript from "helpful suggestions" to "your code is provably safer." Yes, it makes migration harder. Yes, you'll fight with the compiler initially. But every error it catches at compile time is a bug that never makes it to production. This is why every serious TypeScript codebase enables it.
+
 ```json
 {
   "compilerOptions": {
@@ -27,6 +31,8 @@ Deep dive into TypeScript compiler configuration - the options that matter for p
 
 ### Example: strictNullChecks Impact
 
+The billion-dollar mistake (Tony Hoare's words, not mine) is allowing null to inhabit any type. In most languages, a string can secretly be null, leading to "Cannot read property of undefined" errors that plague JavaScript. `strictNullChecks` fixes this by making TypeScript's type system null-aware: if something can be null, you must explicitly say so and check for it.
+
 ```typescript
 // strictNullChecks: false
 let name: string = null;  // ✓ Allowed (dangerous!)
@@ -43,6 +49,10 @@ if (name !== null) {
 ## Module System Options
 
 ### module & target
+
+You write modern TypeScript with async/await and import statements. But your code needs to run on Node 14, support IE11 browsers, and work with both CommonJS and ESM consumers. How do you write once and run everywhere?
+
+That's where `target` and `module` split the problem: `target` controls JavaScript syntax (can we use arrow functions?), while `module` controls import/export format (CommonJS `require` or ESM `import`?). These are independent choices because syntax and module system are orthogonal concerns. Old browsers need old syntax but modern bundlers want ESM for tree-shaking.
 
 ```json
 {
@@ -79,6 +89,8 @@ import { foo } from './bar';
 
 ### Interview Question: target vs lib
 
+This question separates developers who cargo-cult config from those who understand transpilation. You can write code using `Promise` (ES2015) and compile it to ES5 syntax - as long as a polyfill provides `Promise` at runtime. `lib` tells TypeScript "these APIs will exist" while `target` says "compile to this syntax." They're independent because polyfills provide APIs, not syntax.
+
 ```json
 {
   "target": "ES5",          // Output code will be ES5
@@ -94,6 +106,10 @@ TypeScript will:
 ## Module Resolution
 
 ### Resolution Strategies
+
+When you write `import { foo } from './bar'`, how does TypeScript find the file? Should it look for `bar.ts`, `bar/index.ts`, or `bar.js`? Does it need the extension in the import? Different environments have different rules, and TypeScript needs to match them or your code won't run.
+
+The resolution strategy tells TypeScript how to interpret imports. `node` uses classic Node.js rules (extensions optional, checks index files). `node16`/`nodenext` uses modern Node ESM rules (extensions required, respects package.json exports). `bundler` is for webpack/Vite where the bundler handles everything. Pick wrong and your editor shows green checkmarks while your runtime throws "module not found" errors.
 
 ```json
 {
@@ -131,6 +147,10 @@ import { helper } from './utils/index.js';  // ✓
 
 ### Critical Gotcha: File Extensions with Node16
 
+This trips up everyone the first time. You're writing TypeScript, the file is `bar.ts`, but you must import it as `bar.js`. It feels wrong. Why would you reference a .js file that doesn't exist?
+
+The answer is that TypeScript isn't running your code - Node is. TypeScript compiles `bar.ts` to `bar.js`, and Node's ESM loader requires explicit extensions. So TypeScript makes you write the import as it will appear in the compiled output. The source file is `.ts`, but the import path is what Node will see: `.js`. Once you understand this, it makes sense. But the first time? Total headache.
+
 ```typescript
 // tsconfig: { "module": "NodeNext", "moduleResolution": "NodeNext" }
 // package.json: { "type": "module" }
@@ -146,6 +166,10 @@ import { foo } from './bar.js';  // Yes, .js even for .ts files!
 **Why?** TypeScript emits .js files, and Node resolves the emitted .js files.
 
 ## Path Mapping
+
+Deep directory trees lead to import hell: `'../../../../components/Button'`. Move a file and all those relative paths break. Worse, you can't tell at a glance whether you're importing from your code or from node_modules. It's brittle, ugly, and hard to refactor.
+
+Path mapping creates import aliases that look like package names: `@components/Button`, `@utils/helpers`. It's cleaner, refactor-friendly, and immediately obvious what you're importing. But here's the catch: TypeScript only uses these for type-checking. Your compiled JavaScript still has those paths, and Node doesn't know what `@components` means. You need runtime support from your bundler or a tool like `tsconfig-paths`.
 
 ```json
 {
@@ -179,7 +203,9 @@ TypeScript uses `paths` for **type-checking only**. At runtime, you need a bundl
 
 ## Project References (Monorepos)
 
-For large projects or monorepos, split into multiple projects.
+Imagine a monorepo with 50 packages. Every time you change one file, TypeScript rechecks ALL 50 packages. Your editor crawls. Builds take minutes. You need incremental builds, but TypeScript doesn't know which packages depend on what.
+
+Project references solve this by letting you declare dependencies between packages. TypeScript can then rebuild only what changed and what depends on it. Package A imports Package B? TypeScript knows to rebuild B before A. It builds in parallel where possible, caches what hasn't changed, and your monorepo stays fast even as it grows. This is how companies like Microsoft scale TypeScript to massive codebases.
 
 ### Project Structure
 
@@ -499,6 +525,8 @@ Create tsconfig.json for a Node 18+ project with:
 
 ### Q1: What's the difference between "target" and "module"?
 
+This question reveals whether you understand what TypeScript actually does (transpile) versus what you assume it does (magic). Many developers treat these as interchangeable or don't realize they're independent concerns. The answer shows you've thought about how TypeScript compiles to different environments.
+
 <details>
 <summary>Answer</summary>
 
@@ -522,8 +550,10 @@ Create tsconfig.json for a Node 18+ project with:
 
 ### Q2: Why use "isolatedModules": true?
 
+Interviewers ask this to see if you've worked with modern build tools. It shows whether you understand the difference between TypeScript's compiler (tsc) and faster single-file transpilers like esbuild or SWC. If you know why this option exists, you've likely debugged build setup or optimized compilation speed.
+
 <details>
-<summary>Answer</summary>
+<parameter name="new_string">Answer</summary>
 
 Required for build tools that transpile files independently (Babel, esbuild, SWC).
 
@@ -543,6 +573,8 @@ export type { SomeType };
 </details>
 
 ### Q3: When to use "skipLibCheck"?
+
+This separates pragmatic developers from purists. It's a performance vs correctness tradeoff that has a right answer for production (skip it), but junior developers often think "more checking = better." The question tests whether you understand when to optimize compilation speed and can justify tradeoffs.
 
 <details>
 <summary>Answer</summary>
@@ -586,8 +618,10 @@ Enables TypeScript project references. Required for multi-package projects.
 
 ### Q5: Why .js extension for .ts imports with NodeNext?
 
+This is the #1 "gotcha" question for modern Node + TypeScript setups. Every developer encounters this, gets confused, thinks it's a bug, and eventually learns why. Answering this shows you've worked with ESM in Node, understand the compilation model, and know why TypeScript made this design choice (even if you don't like it).
+
 <details>
-<summary>Answer</summary>
+<parameter name="new_string">Answer</summary>
 
 ```typescript
 // file.ts

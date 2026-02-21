@@ -1,0 +1,753 @@
+# Lesson 07: Declaration Files
+
+Master .d.ts files - writing type definitions, ambient declarations, and contributing to DefinitelyTyped.
+
+## What Are Declaration Files?
+
+Declaration files (.d.ts) provide type information for JavaScript code.
+
+```typescript
+// math.js (JavaScript)
+export function add(a, b) {
+  return a + b;
+}
+
+// math.d.ts (Type declarations)
+export function add(a: number, b: number): number;
+```
+
+**Use cases**:
+1. Type JavaScript libraries
+2. Publish types with npm packages
+3. Share types across projects
+4. Contribute to DefinitelyTyped
+
+## Basic Declaration Syntax
+
+### Function Declarations
+
+```typescript
+// Functions
+declare function greet(name: string): string;
+declare function optional(required: string, optional?: number): void;
+declare function overloaded(x: number): number;
+declare function overloaded(x: string): string;
+
+// With generics
+declare function identity<T>(value: T): T;
+```
+
+### Variable Declarations
+
+```typescript
+// Variables
+declare const version: string;
+declare let count: number;
+
+// Objects
+declare const config: {
+  apiUrl: string;
+  timeout: number;
+};
+```
+
+### Class Declarations
+
+```typescript
+declare class EventEmitter {
+  // Constructor
+  constructor(options?: { maxListeners?: number });
+
+  // Methods
+  on(event: string, listener: Function): this;
+  emit(event: string, ...args: any[]): boolean;
+
+  // Properties
+  readonly eventNames: string[];
+
+  // Static members
+  static defaultMaxListeners: number;
+}
+```
+
+### Interface & Type Declarations
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email?: string;
+}
+
+type Status = 'pending' | 'active' | 'inactive';
+
+type Result<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+```
+
+## Module Declarations
+
+### ES Module
+
+```typescript
+// my-lib.d.ts
+export interface Config {
+  apiKey: string;
+}
+
+export function initialize(config: Config): void;
+
+export default class MyLib {
+  constructor(config: Config);
+  run(): void;
+}
+```
+
+### CommonJS Module
+
+```typescript
+// my-lib.d.ts
+export = MyLib;
+
+declare class MyLib {
+  constructor(config: MyLib.Config);
+  run(): void;
+}
+
+declare namespace MyLib {
+  interface Config {
+    apiKey: string;
+  }
+  function helper(): void;
+}
+```
+
+Usage:
+```typescript
+import MyLib = require('my-lib');
+const lib = new MyLib({ apiKey: 'xxx' });
+```
+
+### UMD (Universal Module Definition)
+
+```typescript
+// my-lib.d.ts
+export as namespace MyLib;  // Global variable when loaded via script tag
+
+export interface Config {
+  apiKey: string;
+}
+
+export function initialize(config: Config): void;
+```
+
+Usage:
+```typescript
+// As module
+import { initialize } from 'my-lib';
+
+// As global (script tag)
+MyLib.initialize({ apiKey: 'xxx' });
+```
+
+## Ambient Declarations
+
+Declare types for things that exist at runtime but have no TypeScript source.
+
+### Ambient Modules
+
+```typescript
+// globals.d.ts
+declare module 'untyped-library' {
+  export function doSomething(value: string): number;
+  export const version: string;
+}
+
+// Now can import:
+import { doSomething } from 'untyped-library';
+```
+
+### Wildcard Module Declarations
+
+```typescript
+// For importing non-JS files
+declare module '*.css' {
+  const content: { [className: string]: string };
+  export default content;
+}
+
+declare module '*.png' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.json' {
+  const value: any;
+  export default value;
+}
+
+// Usage:
+import styles from './app.css';
+import logo from './logo.png';
+import data from './config.json';
+```
+
+### Global Augmentation
+
+```typescript
+// Extend global namespace
+declare global {
+  interface Window {
+    myApp: {
+      version: string;
+      config: Record<string, any>;
+    };
+  }
+
+  namespace NodeJS {
+    interface ProcessEnv {
+      DATABASE_URL: string;
+      API_KEY: string;
+    }
+  }
+
+  var DEBUG: boolean;
+}
+
+// Must export to be treated as module
+export {};
+```
+
+Usage:
+```typescript
+window.myApp.version;     // ✓ Type-safe
+process.env.DATABASE_URL; // ✓ Type-safe
+if (DEBUG) {              // ✓ Type-safe
+  console.log('Debug mode');
+}
+```
+
+## Triple-Slash Directives
+
+Special comments that provide instructions to the compiler.
+
+### Reference Types
+
+```typescript
+/// <reference types="node" />
+
+// Now Node.js types are available
+const buffer: Buffer = Buffer.from('hello');
+```
+
+### Reference Path
+
+```typescript
+/// <reference path="./custom-types.d.ts" />
+
+// Include types from another file
+```
+
+### Reference Lib
+
+```typescript
+/// <reference lib="es2015" />
+/// <reference lib="dom" />
+
+// Include specific library types
+```
+
+**Note**: Usually prefer tsconfig.json `types` and `lib` options instead.
+
+## Publishing Type Definitions
+
+### Option 1: Bundle with Package
+
+```
+my-package/
+  dist/
+    index.js
+    index.d.ts    ← Generated by TypeScript
+  src/
+    index.ts
+  package.json
+  tsconfig.json
+```
+
+**package.json**:
+```json
+{
+  "name": "my-package",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc"
+  }
+}
+```
+
+**tsconfig.json**:
+```json
+{
+  "compilerOptions": {
+    "declaration": true,      // Generate .d.ts
+    "declarationMap": true,   // Generate .d.ts.map
+    "outDir": "./dist"
+  }
+}
+```
+
+### Option 2: Separate @types Package
+
+For JavaScript libraries without built-in types.
+
+```
+@types/my-library/
+  index.d.ts
+  package.json
+```
+
+**Published to**: `@types/my-library` on npm (via DefinitelyTyped).
+
+## Writing Quality Declarations
+
+### Do's
+
+```typescript
+// ✓ Specific types
+export function parse(input: string): ParsedResult;
+
+// ✓ Proper overloads
+export function get(key: string): string | undefined;
+export function get(key: string, fallback: string): string;
+
+// ✓ Readonly where appropriate
+export interface Config {
+  readonly apiKey: string;
+}
+
+// ✓ Generics for reusable types
+export function map<T, U>(arr: T[], fn: (item: T) => U): U[];
+
+// ✓ Document with JSDoc
+/**
+ * Fetches user by ID
+ * @param id - User identifier
+ * @returns User object or null if not found
+ */
+export function fetchUser(id: number): Promise<User | null>;
+```
+
+### Don'ts
+
+```typescript
+// ❌ Overly permissive
+export function doSomething(input: any): any;
+
+// ❌ Missing overloads
+export function get(key: string, fallback?: string): string | undefined;
+// Better: Use overloads for different return types
+
+// ❌ Incorrect mutability
+export interface Config {
+  apiKey: string;  // Can be reassigned
+}
+
+// ❌ Poor generic constraints
+export function process<T>(value: T): T;
+// Better: Add meaningful constraints
+export function process<T extends Processable>(value: T): T;
+```
+
+## Advanced Patterns
+
+### Namespace Merging
+
+```typescript
+// Combine interface and namespace
+export interface JQuery {
+  text(): string;
+  text(value: string): this;
+}
+
+export namespace JQuery {
+  interface AjaxSettings {
+    url: string;
+    method?: string;
+  }
+
+  function ajax(settings: AjaxSettings): Promise<any>;
+}
+
+// Usage:
+declare const $: JQuery;
+$.text('hello');
+JQuery.ajax({ url: '/api' });
+```
+
+### Conditional Types in Declarations
+
+```typescript
+export type AsyncOrSync<T> = T extends Promise<any> ? T : Promise<T>;
+
+export function wrap<T>(value: T): AsyncOrSync<T>;
+
+// Usage:
+const a = wrap(42);              // Promise<number>
+const b = wrap(Promise.resolve(42));  // Promise<number>
+```
+
+### Branded Types
+
+```typescript
+// Prevent mixing different ID types
+export type UserId = string & { __brand: 'UserId' };
+export type PostId = string & { __brand: 'PostId' };
+
+export function getUserById(id: UserId): User;
+export function getPostById(id: PostId): Post;
+
+// Can't accidentally mix:
+declare const userId: UserId;
+declare const postId: PostId;
+
+getUserById(userId);   // ✓
+getUserById(postId);   // ❌ Error
+```
+
+## DefinitelyTyped Contribution
+
+### Project Structure
+
+```
+DefinitelyTyped/
+  types/
+    my-library/
+      index.d.ts
+      my-library-tests.ts
+      tsconfig.json
+      tslint.json
+```
+
+### Example Declaration
+
+```typescript
+// index.d.ts
+// Type definitions for my-library 1.0
+// Project: https://github.com/user/my-library
+// Definitions by: Your Name <https://github.com/yourusername>
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+export interface Options {
+  timeout?: number;
+  retries?: number;
+}
+
+export function connect(url: string, options?: Options): Promise<Connection>;
+
+export class Connection {
+  send(data: string): void;
+  close(): void;
+}
+```
+
+### Test File
+
+```typescript
+// my-library-tests.ts
+import { connect, Options } from 'my-library';
+
+const options: Options = {
+  timeout: 5000,
+  retries: 3
+};
+
+connect('ws://localhost', options).then(conn => {
+  conn.send('hello');
+  conn.close();
+});
+```
+
+### tsconfig.json
+
+```json
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "lib": ["es6"],
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "types": [],
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "files": [
+    "index.d.ts",
+    "my-library-tests.ts"
+  ]
+}
+```
+
+## Hands-On Exercise 1: Write Declaration File
+
+Create type definitions for this JavaScript module:
+
+```javascript
+// cache.js
+class Cache {
+  constructor(options) {
+    this.maxSize = options?.maxSize || 100;
+    this.data = new Map();
+  }
+
+  set(key, value, ttl) {
+    this.data.set(key, { value, expires: Date.now() + (ttl || 0) });
+  }
+
+  get(key) {
+    const item = this.data.get(key);
+    if (!item) return undefined;
+    if (item.expires && item.expires < Date.now()) {
+      this.data.delete(key);
+      return undefined;
+    }
+    return item.value;
+  }
+
+  clear() {
+    this.data.clear();
+  }
+}
+
+module.exports = Cache;
+```
+
+<details>
+<summary>Solution</summary>
+
+```typescript
+// cache.d.ts
+export = Cache;
+
+declare class Cache<K = string, V = any> {
+  constructor(options?: Cache.Options);
+
+  set(key: K, value: V, ttl?: number): void;
+  get(key: K): V | undefined;
+  clear(): void;
+
+  readonly maxSize: number;
+}
+
+declare namespace Cache {
+  interface Options {
+    maxSize?: number;
+  }
+}
+```
+
+Usage:
+```typescript
+import Cache = require('./cache');
+
+const cache = new Cache<string, number>({ maxSize: 50 });
+cache.set('count', 42, 1000);
+const value = cache.get('count');  // number | undefined
+```
+
+</details>
+
+## Hands-On Exercise 2: Augment Express
+
+Add custom properties to Express Request:
+
+```typescript
+// Goal: Make these type-safe
+app.get('/', (req, res) => {
+  const userId = req.userId;     // Should be string
+  const session = req.session;   // Should be Session
+});
+```
+
+<details>
+<summary>Solution</summary>
+
+```typescript
+// types/express.d.ts
+import { Session } from './session';
+
+declare global {
+  namespace Express {
+    interface Request {
+      userId: string;
+      session: Session;
+    }
+  }
+}
+
+// Must export to be treated as module
+export {};
+```
+
+Or with module augmentation:
+```typescript
+// types/express-augmentation.d.ts
+import { Session } from './session';
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    userId: string;
+    session: Session;
+  }
+}
+```
+
+</details>
+
+## Interview Questions
+
+### Q1: When to use declare keyword?
+
+<details>
+<summary>Answer</summary>
+
+Use `declare` for ambient declarations - types for things that exist at runtime.
+
+```typescript
+// Declaring global variable from script tag
+declare const jQuery: {
+  (selector: string): any;
+};
+
+// Declaring module without implementation
+declare module 'my-untyped-lib' {
+  export function doThing(): void;
+}
+
+// Declaring global namespace
+declare namespace MyGlobal {
+  function init(): void;
+}
+```
+
+**Don't use** in regular .ts files (implementations) - only in .d.ts files.
+
+</details>
+
+### Q2: How to type a library with both default and named exports?
+
+<details>
+<summary>Answer</summary>
+
+```typescript
+// Library: module.exports = foo; module.exports.bar = bar;
+
+// Declaration:
+export = MyLib;
+
+declare function MyLib(): void;
+
+declare namespace MyLib {
+  export function bar(): void;
+  export const version: string;
+}
+
+// Usage:
+import MyLib = require('my-lib');
+
+MyLib();           // Default
+MyLib.bar();       // Named
+MyLib.version;     // Named
+```
+
+For ESM:
+```typescript
+declare const myLib: {
+  (): void;
+  bar(): void;
+  version: string;
+};
+
+export default myLib;
+export const bar: typeof myLib.bar;
+export const version: string;
+```
+
+</details>
+
+### Q3: What's the difference between types and @types?
+
+<details>
+<summary>Answer</summary>
+
+**Built-in types** (with package):
+```json
+// package.json
+{
+  "name": "my-lib",
+  "types": "./dist/index.d.ts"
+}
+```
+Published together, always in sync.
+
+**@types packages** (separate):
+```bash
+npm install @types/my-lib
+```
+Community-maintained, may lag behind library updates.
+
+**Preference**: Use built-in types when available. Use @types for libraries without types.
+
+</details>
+
+### Q4: How do triple-slash directives work?
+
+<details>
+<summary>Answer</summary>
+
+Special comments for compiler instructions.
+
+```typescript
+/// <reference types="node" />
+// Include @types/node
+
+/// <reference path="./types.d.ts" />
+// Include specific file
+
+/// <reference lib="es2015" />
+// Include specific lib
+```
+
+**Modern alternative**: Use tsconfig.json:
+```json
+{
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2015"]
+  }
+}
+```
+
+</details>
+
+## Key Takeaways
+
+1. **.d.ts files**: Provide types for JavaScript code
+2. **declare**: For ambient declarations (global, modules)
+3. **Module declarations**: Support ESM, CommonJS, UMD
+4. **Global augmentation**: Extend Window, NodeJS.ProcessEnv, etc.
+5. **Publishing**: Bundle .d.ts or publish to @types
+6. **Quality**: Specific types, overloads, readonly, generics
+7. **DefinitelyTyped**: Community type definitions
+
+## Next Steps
+
+In [Lesson 08: Publishing npm Packages](lesson-08-publishing-npm-packages.md), you'll learn:
+- Build setup for dual ESM/CJS publishing
+- Version management and semver
+- npm publishing workflow
+- Package distribution best practices

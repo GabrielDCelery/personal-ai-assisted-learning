@@ -6,24 +6,24 @@ Critical knowledge about package.json for TypeScript developers - dependency man
 
 When you install a package, npm needs to know: "Should this be installed when someone uses my package? When they develop it? Should they provide it themselves?" Getting this wrong means bloated bundles, missing dependencies at runtime, or version conflicts that break your app. Each dependency type tells npm a different story about how your package relates to its dependencies.
 
-| Type | When to Use | Installed | Bundled |
-|------|-------------|-----------|---------|
-| `dependencies` | Runtime requirements | Always | Yes (if published) |
-| `devDependencies` | Build/test tools only | Only in dev | No |
-| `peerDependencies` | Plugin/extension deps | Manual (shows warning) | No |
-| `optionalDependencies` | Nice-to-have, fallback if fails | Tries, continues on fail | Yes |
-| `bundledDependencies` | Force specific versions | Always | Yes (literally bundled) |
+| Type                   | When to Use                     | Installed                | Bundled                 |
+| ---------------------- | ------------------------------- | ------------------------ | ----------------------- |
+| `dependencies`         | Runtime requirements            | Always                   | Yes (if published)      |
+| `devDependencies`      | Build/test tools only           | Only in dev              | No                      |
+| `peerDependencies`     | Plugin/extension deps           | Manual (shows warning)   | No                      |
+| `optionalDependencies` | Nice-to-have, fallback if fails | Tries, continues on fail | Yes                     |
+| `bundledDependencies`  | Force specific versions         | Always                   | Yes (literally bundled) |
 
 ### Common Mistakes
 
 ```json
 {
   "dependencies": {
-    "typescript": "^5.0.0"  // ❌ Wrong - TypeScript is a build tool
+    "typescript": "^5.0.0" // ❌ Wrong - TypeScript is a build tool
   },
   "devDependencies": {
     "typescript": "^5.0.0", // ✓ Correct
-    "express": "^4.18.0"    // ❌ Wrong - express is needed at runtime
+    "express": "^4.18.0" // ❌ Wrong - express is needed at runtime
   }
 }
 ```
@@ -38,16 +38,16 @@ Peer dependencies solve this by saying "I need React to work, but I expect YOU (
 {
   "name": "my-react-component",
   "peerDependencies": {
-    "react": "^18.0.0",      // User must have React 18+
+    "react": "^18.0.0", // User must have React 18+
     "react-dom": "^18.0.0"
   },
   "peerDependenciesMeta": {
     "react-dom": {
-      "optional": true        // Won't warn if missing
+      "optional": true // Won't warn if missing
     }
   },
   "devDependencies": {
-    "react": "^18.0.0",       // Still needed for development
+    "react": "^18.0.0", // Still needed for development
     "react-dom": "^18.0.0"
   }
 }
@@ -63,13 +63,13 @@ Semantic versioning and version ranges solve this by encoding meaning into versi
 
 Format: `MAJOR.MINOR.PATCH` (e.g., `1.4.2`)
 
-| Version | Meaning | Allows |
-|---------|---------|--------|
-| `1.4.2` | Exact version | Only 1.4.2 |
-| `^1.4.2` | Compatible (caret) | >=1.4.2 <2.0.0 |
-| `~1.4.2` | Approximately (tilde) | >=1.4.2 <1.5.0 |
-| `>=1.4.2 <2.0.0` | Range | 1.4.2 to <2.0.0 |
-| `*` or `latest` | Latest | Any version |
+| Version          | Meaning               | Allows          |
+| ---------------- | --------------------- | --------------- |
+| `1.4.2`          | Exact version         | Only 1.4.2      |
+| `^1.4.2`         | Compatible (caret)    | >=1.4.2 <2.0.0  |
+| `~1.4.2`         | Approximately (tilde) | >=1.4.2 <1.5.0  |
+| `>=1.4.2 <2.0.0` | Range                 | 1.4.2 to <2.0.0 |
+| `*` or `latest`  | Latest                | Any version     |
 
 ### Interview Question: ^ vs ~
 
@@ -91,11 +91,11 @@ Format: `MAJOR.MINOR.PATCH` (e.g., `1.4.2`)
 
 Lock files freeze the ENTIRE dependency tree - every package, every transitive dependency, down to the exact version and download URL. This means your teammate, your CI server, and production all get the exact same dependency versions you tested with. No surprises, no "but it worked yesterday."
 
-| File | Manager | Purpose |
-|------|---------|---------|
-| `package-lock.json` | npm | Locks exact dependency tree |
-| `yarn.lock` | yarn | Locks exact dependency tree |
-| `pnpm-lock.yaml` | pnpm | Locks exact dependency tree |
+| File                | Manager | Purpose                     |
+| ------------------- | ------- | --------------------------- |
+| `package-lock.json` | npm     | Locks exact dependency tree |
+| `yarn.lock`         | yarn    | Locks exact dependency tree |
+| `pnpm-lock.yaml`    | pnpm    | Locks exact dependency tree |
 
 **Critical**: Always commit lock files. They ensure reproducible builds.
 
@@ -123,8 +123,8 @@ The old solution was to pick one format and let tools figure it out. The modern 
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",    // ESM
-      "require": "./dist/index.js",    // CommonJS
+      "import": "./dist/index.mjs", // ESM
+      "require": "./dist/index.js", // CommonJS
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
@@ -145,10 +145,10 @@ Tools read the `exports` object from top to bottom and use the first condition t
 {
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",    // ✓ Types first (for TypeScript)
-      "import": "./dist/index.mjs",    // ✓ ESM
-      "require": "./dist/index.js",    // ✓ CJS
-      "default": "./dist/index.js"     // ✓ Fallback
+      "types": "./dist/index.d.ts", // ✓ Types first (for TypeScript)
+      "import": "./dist/index.mjs", // ✓ ESM
+      "require": "./dist/index.js", // ✓ CJS
+      "default": "./dist/index.js" // ✓ Fallback
     }
   }
 }
@@ -165,23 +165,23 @@ Subpath exports give you control. You explicitly list what's importable. Everyth
   "exports": {
     ".": "./dist/index.js",
     "./utils": "./dist/utils.js",
-    "./internal/*": null              // ❌ Block access to internals
+    "./internal/*": null // ❌ Block access to internals
   }
 }
 ```
 
 ```typescript
 // Users can import:
-import lib from 'my-library';          // ✓ Works
-import utils from 'my-library/utils';  // ✓ Works
-import foo from 'my-library/internal/foo'; // ❌ Error!
+import lib from "my-library"; // ✓ Works
+import utils from "my-library/utils"; // ✓ Works
+import foo from "my-library/internal/foo"; // ❌ Error!
 ```
 
 ## Publishing-Critical Fields
 
 ```json
 {
-  "name": "@scope/package-name",  // Scoped package
+  "name": "@scope/package-name", // Scoped package
   "version": "1.0.0",
   "description": "Shows in npm search",
   "keywords": ["searchable", "terms"],
@@ -197,14 +197,10 @@ import foo from 'my-library/internal/foo'; // ❌ Error!
   },
 
   // What gets published
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["dist", "README.md", "LICENSE"],
 
   // Prevent accidental publishing
-  "private": true,  // Set to false when ready to publish
+  "private": true, // Set to false when ready to publish
 
   // npm version compatibility
   "engines": {
@@ -213,7 +209,7 @@ import foo from 'my-library/internal/foo'; // ❌ Error!
   },
 
   // Type of module system
-  "type": "module"  // or "commonjs" (default)
+  "type": "module" // or "commonjs" (default)
 }
 ```
 
@@ -221,17 +217,19 @@ import foo from 'my-library/internal/foo'; // ❌ Error!
 
 ```json
 {
-  "files": ["dist"]  // Only publishes dist/ directory
+  "files": ["dist"] // Only publishes dist/ directory
 }
 ```
 
 **Always included** (can't exclude):
+
 - package.json
 - README
 - LICENSE
 - CHANGELOG
 
 **Always excluded** (can't include):
+
 - node_modules
 - .git
 
@@ -255,8 +253,8 @@ Lifecycle hooks automate the checklist. `prepublishOnly` runs your build and tes
 
     // Composite scripts
     "clean": "rm -rf dist",
-    "prebuild": "npm run clean",      // Runs BEFORE build
-    "postbuild": "npm run test",      // Runs AFTER build
+    "prebuild": "npm run clean", // Runs BEFORE build
+    "postbuild": "npm run test", // Runs AFTER build
 
     // Development
     "dev": "tsc --watch",
@@ -300,6 +298,7 @@ The difference between `prepublishOnly` and `prepare` trips up even experienced 
 ```
 
 **Key difference**:
+
 - `prepublishOnly`: Only before `npm publish`
 - `prepare`: Before `npm publish` AND after `npm install` (useful for git dependencies)
 
@@ -311,23 +310,23 @@ The `type` field in package.json is the signal. `"type": "module"` means "treat 
 
 ```json
 {
-  "type": "module"  // Default: "commonjs"
+  "type": "module" // Default: "commonjs"
 }
 ```
 
-| Type | .js files are | .mjs | .cjs |
-|------|---------------|------|------|
-| `"module"` | ESM | ESM | CommonJS |
-| `"commonjs"` | CommonJS | ESM | CommonJS |
+| Type         | .js files are | .mjs | .cjs     |
+| ------------ | ------------- | ---- | -------- |
+| `"module"`   | ESM           | ESM  | CommonJS |
+| `"commonjs"` | CommonJS      | ESM  | CommonJS |
 
 ```javascript
 // package.json: { "type": "module" }
 // index.js
-export const foo = 'bar';  // ✓ Valid ESM
+export const foo = "bar"; // ✓ Valid ESM
 
 // package.json: { "type": "commonjs" } or missing
 // index.js
-module.exports = { foo: 'bar' };  // ✓ Valid CJS
+module.exports = { foo: "bar" }; // ✓ Valid CJS
 ```
 
 ## Hands-On Exercise 1: Dependency Audit
@@ -353,11 +352,13 @@ Analyze a package.json and identify issues:
 <summary>Solution</summary>
 
 **Issues**:
+
 1. ❌ `typescript` should be in `devDependencies` (build tool)
 2. ⚠️ `dotenv` might be needed in `dependencies` if loading env vars at runtime
 3. ⚠️ If this is a library (not an app), `react` should be a `peerDependency`
 
 **Fixed**:
+
 ```json
 {
   "dependencies": {
@@ -383,6 +384,7 @@ Analyze a package.json and identify issues:
 Create package.json for a library that supports both ESM and CommonJS.
 
 **Requirements**:
+
 - Build outputs to `dist/`
 - Support TypeScript
 - Provide both ESM (.mjs) and CJS (.js) builds
@@ -406,9 +408,7 @@ Create package.json for a library that supports both ESM and CommonJS.
       "default": "./dist/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "tsc && tsc --module esnext --outDir dist/esm && mv dist/esm/index.js dist/index.mjs",
     "prepublishOnly": "npm run build"
@@ -449,6 +449,7 @@ Interviewers ask this to see if you understand package architecture and have pub
 Prevents version conflicts for plugins/extensions. Example:
 
 If your React component library used regular dependencies:
+
 ```
 App depends on React 18.0.0
 Your library bundles React 18.2.0
@@ -456,6 +457,7 @@ Your library bundles React 18.2.0
 ```
 
 With peerDependencies:
+
 ```
 App depends on React 18.0.0
 Your library requires React ^18.0.0 (peer)
@@ -479,9 +481,9 @@ This question tests whether you're keeping up with modern npm practices. The `ex
 ```json
 {
   "exports": {
-    ".": "./index.js",              // import 'pkg'
-    "./utils": "./utils.js",        // import 'pkg/utils'
-    "./internal/*": null            // Block 'pkg/internal/*'
+    ".": "./index.js", // import 'pkg'
+    "./utils": "./utils.js", // import 'pkg/utils'
+    "./internal/*": null // Block 'pkg/internal/*'
   }
 }
 ```
@@ -504,6 +506,7 @@ This catches developers who've only worked on apps (where build happens locally)
   - `npm publish`
 
 **Use case**:
+
 - `prepublishOnly`: Build + test before publishing
 - `prepare`: Build (for git dependencies that need compilation)
 
@@ -522,6 +525,7 @@ This catches developers who've only worked on apps (where build happens locally)
 ## Next Steps
 
 In [Lesson 02: tsconfig.json Mastery](lesson-02-tsconfig-mastery.md), you'll learn:
+
 - Critical compiler options and their implications
 - Module resolution strategies
 - Project references for monorepos

@@ -63,11 +63,7 @@ The most important file for package distribution. Every field matters: `name` an
     "./package.json": "./package.json"
   },
 
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["dist", "README.md", "LICENSE"],
 
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm && npm run build:types",
@@ -138,6 +134,7 @@ Organize build output by module format: `dist/esm/` for ES modules, `dist/cjs/` 
 ```
 
 **Build scripts**:
+
 ```bash
 tsc --module commonjs --outDir dist/cjs
 tsc --module esnext --outDir dist/esm
@@ -161,17 +158,22 @@ Node.js uses file extensions to determine module type: `.mjs` is ESM, `.js` is C
 ```
 
 **Build script** (rename-esm.js):
-```javascript
-import fs from 'fs';
-import path from 'path';
 
-const esmDir = path.join(process.cwd(), 'dist/esm');
+```javascript
+import fs from "fs";
+import path from "path";
+
+const esmDir = path.join(process.cwd(), "dist/esm");
 const files = fs.readdirSync(esmDir);
 
 for (const file of files) {
-  if (file.endsWith('.js')) {
+  if (file.endsWith(".js")) {
     const oldPath = path.join(esmDir, file);
-    const newPath = path.join(process.cwd(), 'dist', file.replace('.js', '.mjs'));
+    const newPath = path.join(
+      process.cwd(),
+      "dist",
+      file.replace(".js", ".mjs"),
+    );
     fs.renameSync(oldPath, newPath);
   }
 }
@@ -182,17 +184,18 @@ for (const file of files) {
 Manual dual compilation is error-prone and tedious. Build tools like `tsup` (popular, fast) and `@microsoft/api-extractor` (for API docs) automate the entire process: they compile TypeScript to ESM and CJS, generate declaration files, bundle dependencies if needed, and produce source maps—all with one command. Modern packages use these tools instead of raw `tsc` commands.
 
 **Using tsup**:
+
 ```bash
 npm install -D tsup
 ```
 
 ```javascript
 // tsup.config.ts
-import { defineConfig } from 'tsup';
+import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['cjs', 'esm'],
+  entry: ["src/index.ts"],
+  format: ["cjs", "esm"],
   dts: true,
   splitting: false,
   sourcemap: true,
@@ -209,6 +212,7 @@ export default defineConfig({
 ```
 
 **Using @microsoft/api-extractor** (for API documentation):
+
 ```bash
 npm install -D @microsoft/api-extractor
 ```
@@ -269,6 +273,7 @@ Lifecycle hooks let you automate the entire release workflow. `preversion` runs 
 ```
 
 **Workflow**:
+
 1. `npm version patch`
 2. Runs `preversion` (tests)
 3. Updates version in package.json
@@ -417,8 +422,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: npm ci
@@ -448,19 +453,20 @@ npm install -D semantic-release @semantic-release/git @semantic-release/changelo
 ```javascript
 // .releaserc.js
 module.exports = {
-  branches: ['main'],
+  branches: ["main"],
   plugins: [
-    '@semantic-release/commit-analyzer',
-    '@semantic-release/release-notes-generator',
-    '@semantic-release/changelog',
-    '@semantic-release/npm',
-    '@semantic-release/git',
-    '@semantic-release/github',
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    "@semantic-release/npm",
+    "@semantic-release/git",
+    "@semantic-release/github",
   ],
 };
 ```
 
 **Commit conventions**:
+
 ```bash
 feat: add new feature      # → Minor release
 fix: resolve bug           # → Patch release
@@ -478,11 +484,13 @@ Packages automatically available on CDNs for browser usage—no build step neede
 Packages automatically available on CDNs:
 
 **unpkg**:
+
 ```html
 <script src="https://unpkg.com/my-package@1.0.0/dist/index.js"></script>
 ```
 
 **jsDelivr**:
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/my-package@1.0.0/dist/index.js"></script>
 ```
@@ -511,7 +519,7 @@ Namespacing for package names. `@myorg/package` prevents naming collisions, grou
 {
   "name": "@myorg/my-package",
   "publishConfig": {
-    "access": "public"  // or "restricted" for private
+    "access": "public" // or "restricted" for private
   }
 }
 ```
@@ -570,13 +578,13 @@ Loose constraints (`^4.17.21`) allow users to get bug fixes and features without
 ```json
 {
   "dependencies": {
-    "lodash": "^4.17.21"      // ✓ Allow minor/patch
+    "lodash": "^4.17.21" // ✓ Allow minor/patch
   },
   "devDependencies": {
-    "typescript": "^5.0.0"    // ✓ Allow minor/patch
+    "typescript": "^5.0.0" // ✓ Allow minor/patch
   },
   "peerDependencies": {
-    "react": "^18.0.0"        // ✓ Wide range for compatibility
+    "react": "^18.0.0" // ✓ Wide range for compatibility
   }
 }
 ```
@@ -587,11 +595,7 @@ Publish dist/ (compiled code), README.md (documentation), LICENSE (legal). Exclu
 
 ```json
 {
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ]
+  "files": ["dist", "README.md", "LICENSE"]
 }
 ```
 
@@ -643,6 +647,7 @@ npm pack --dry-run
 Create and publish a simple utility package:
 
 **Requirements**:
+
 1. Create a package with one utility function
 2. Support both ESM and CommonJS
 3. Include TypeScript types
@@ -672,7 +677,7 @@ export function capitalize(str: string): string {
  */
 export function debounce<T extends (...args: any[]) => any>(
   fn: T,
-  delay: number
+  delay: number,
 ): (...args: Parameters<T>) => void {
   let timeoutId: ReturnType<typeof setTimeout>;
 
@@ -731,7 +736,7 @@ import { capitalize, debounce } from '@yourusername/utils';
 console.log(capitalize('hello')); // 'Hello'
 
 const search = debounce((query) => {
-  console.log('Searching:', query);
+console.log('Searching:', query);
 }, 300);
 \`\`\`
 
@@ -765,10 +770,11 @@ Tests understanding of modern package distribution and the `exports` field. Stro
 <summary>Answer</summary>
 
 **Method 1: Different extensions**
+
 ```json
 {
-  "main": "./dist/index.js",      // CJS
-  "module": "./dist/index.mjs",   // ESM
+  "main": "./dist/index.js", // CJS
+  "module": "./dist/index.mjs", // ESM
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -783,6 +789,7 @@ Tests understanding of modern package distribution and the `exports` field. Stro
 **Build**: Compile twice, rename ESM files to .mjs
 
 **Method 2: Separate directories**
+
 ```json
 {
   "exports": {
@@ -805,24 +812,27 @@ Reveals understanding of dependency management and package size. Strong answers 
 <summary>Answer</summary>
 
 **dependencies**: Installed with your package
+
 ```json
 {
   "dependencies": {
-    "lodash": "^4.17.21"  // Always installed
+    "lodash": "^4.17.21" // Always installed
   }
 }
 ```
 
 **peerDependencies**: User must install (not bundled)
+
 ```json
 {
   "peerDependencies": {
-    "react": "^18.0.0"  // User's project must have React
+    "react": "^18.0.0" // User's project must have React
   }
 }
 ```
 
 **Use peerDependencies** for:
+
 - Plugins/extensions (React components, Babel plugins)
 - Avoid version conflicts
 - Prevent bundling multiple copies
@@ -841,6 +851,7 @@ npm version patch  # 1.0.0 → 1.0.1
 ```
 
 **Process**:
+
 1. Runs `preversion` script
 2. Updates package.json version
 3. Runs `version` script
@@ -849,6 +860,7 @@ npm version patch  # 1.0.0 → 1.0.1
 6. Runs `postversion` script
 
 **Automation**:
+
 ```json
 {
   "scripts": {
@@ -869,12 +881,14 @@ Reveals practical experience with npm packaging. Strong answers mention the `fil
 <summary>Answer</summary>
 
 **Include**:
+
 - `dist/` (compiled code)
 - `README.md`
 - `LICENSE`
 - `CHANGELOG.md`
 
 **Exclude** (via .npmignore):
+
 - `src/` (source TypeScript)
 - `tests/`
 - Config files (tsconfig.json, .eslintrc, etc.)
@@ -887,6 +901,7 @@ Reveals practical experience with npm packaging. Strong answers mention the `fil
 ```
 
 Check before publishing:
+
 ```bash
 npm pack --dry-run
 ```
@@ -906,6 +921,7 @@ npm pack --dry-run
 ## Summary
 
 You now have a comprehensive understanding of:
+
 - Package configuration for publishing
 - Dual ESM/CJS distribution
 - Versioning and semver

@@ -14,15 +14,15 @@ function identity<T>(value: T): T {
   return value;
 }
 
-const num = identity(42);        // T = number
-const str = identity('hello');   // T = string
+const num = identity(42); // T = number
+const str = identity("hello"); // T = string
 
 // Generic interface
 interface Box<T> {
   value: T;
 }
 
-const stringBox: Box<string> = { value: 'hello' };
+const stringBox: Box<string> = { value: "hello" };
 const numberBox: Box<number> = { value: 42 };
 
 // Generic class
@@ -50,18 +50,18 @@ The classic mistake: write a generic function that tries to use a property that 
 ```typescript
 // Without constraint
 function getLength<T>(arg: T): number {
-  return arg.length;  // ❌ Error: Property 'length' does not exist on type 'T'
+  return arg.length; // ❌ Error: Property 'length' does not exist on type 'T'
 }
 
 // With constraint
 function getLength<T extends { length: number }>(arg: T): number {
-  return arg.length;  // ✓ TypeScript knows T has length
+  return arg.length; // ✓ TypeScript knows T has length
 }
 
-getLength('hello');      // ✓ string has length
-getLength([1, 2, 3]);    // ✓ array has length
+getLength("hello"); // ✓ string has length
+getLength([1, 2, 3]); // ✓ array has length
 getLength({ length: 5 }); // ✓ matches constraint
-getLength(42);           // ❌ Error: number has no length
+getLength(42); // ❌ Error: number has no length
 ```
 
 ### Multiple Constraints
@@ -82,9 +82,9 @@ function process<T extends HasId & HasName>(item: T): void {
   console.log(item.id, item.name);
 }
 
-process({ id: 1, name: 'Alice' });           // ✓
-process({ id: 1, name: 'Bob', age: 30 });    // ✓ Extra properties OK
-process({ id: 1 });                          // ❌ Missing name
+process({ id: 1, name: "Alice" }); // ✓
+process({ id: 1, name: "Bob", age: 30 }); // ✓ Extra properties OK
+process({ id: 1 }); // ❌ Missing name
 ```
 
 ### keyof Constraint
@@ -99,11 +99,11 @@ function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
   return obj[key];
 }
 
-const person = { name: 'Alice', age: 30 };
+const person = { name: "Alice", age: 30 };
 
-const name = getProperty(person, 'name');  // Type: string
-const age = getProperty(person, 'age');    // Type: number
-getProperty(person, 'email');              // ❌ Error: 'email' not in person
+const name = getProperty(person, "name"); // Type: string
+const age = getProperty(person, "age"); // Type: number
+getProperty(person, "email"); // ❌ Error: 'email' not in person
 ```
 
 ### Constraint Inference
@@ -120,7 +120,7 @@ const merged = merge({ a: 1 }, { b: 2 });
 // Type: { a: number } & { b: number }
 // = { a: number; b: number }
 
-console.log(merged.a, merged.b);  // ✓ Both properties available
+console.log(merged.a, merged.b); // ✓ Both properties available
 ```
 
 ## Default Type Parameters
@@ -139,14 +139,14 @@ interface ApiResponse<T = unknown> {
 
 // With explicit type
 const response1: ApiResponse<User> = {
-  data: { id: 1, name: 'Alice' },
-  status: 200
+  data: { id: 1, name: "Alice" },
+  status: 200,
 };
 
 // Uses default (unknown)
 const response2: ApiResponse = {
   data: { anything: true },
-  status: 200
+  status: 200,
 };
 // Type: ApiResponse<unknown>
 ```
@@ -160,9 +160,9 @@ type Result<T = string, E = Error> =
   | { success: true; value: T }
   | { success: false; error: E };
 
-type StringResult = Result;              // Result<string, Error>
-type NumberResult = Result<number>;      // Result<number, Error>
-type CustomResult = Result<User, ApiError>;  // Result<User, ApiError>
+type StringResult = Result; // Result<string, Error>
+type NumberResult = Result<number>; // Result<number, Error>
+type CustomResult = Result<User, ApiError>; // Result<User, ApiError>
 ```
 
 ### Conditional Defaults
@@ -214,9 +214,9 @@ function combine<T>(a: T, b: T): T[] {
   return [a, b];
 }
 
-combine(1, 2);           // T = number
-combine('a', 'b');       // T = string
-combine(1, 'b');         // T = string | number (best common type)
+combine(1, 2); // T = number
+combine("a", "b"); // T = string
+combine(1, "b"); // T = string | number (best common type)
 ```
 
 ### Inference Priority
@@ -229,7 +229,7 @@ function create<T>(value: T, defaults?: Partial<T>): T {
 }
 
 // T inferred from first argument
-const user = create({ name: 'Alice' }, { age: 30 });
+const user = create({ name: "Alice" }, { age: 30 });
 // Type: { name: string }
 // ⚠️ defaults type is ignored for inference
 ```
@@ -255,7 +255,7 @@ class User {
   constructor(public name: string) {}
 }
 
-const user = createInstance(User, 'Alice');
+const user = createInstance(User, "Alice");
 // Type: User
 ```
 
@@ -269,13 +269,11 @@ class QueryBuilder<T> {
 
   where(predicate: (item: T) => boolean): this {
     this.filters.push(predicate);
-    return this;  // Return 'this' for chaining
+    return this; // Return 'this' for chaining
   }
 
   execute(data: T[]): T[] {
-    return data.filter(item =>
-      this.filters.every(fn => fn(item))
-    );
+    return data.filter((item) => this.filters.every((fn) => fn(item)));
   }
 }
 
@@ -285,13 +283,13 @@ interface User {
 }
 
 const users: User[] = [
-  { name: 'Alice', age: 30 },
-  { name: 'Bob', age: 25 }
+  { name: "Alice", age: 30 },
+  { name: "Bob", age: 25 },
 ];
 
 const result = new QueryBuilder<User>()
-  .where(u => u.age > 20)
-  .where(u => u.name.startsWith('A'))
+  .where((u) => u.age > 20)
+  .where((u) => u.name.startsWith("A"))
   .execute(users);
 // [{ name: 'Alice', age: 30 }]
 ```
@@ -313,20 +311,20 @@ interface User {
   active: boolean;
 }
 
-type StringKeys = KeysOfType<User, string>;  // 'name'
-type NumberKeys = KeysOfType<User, number>;  // 'id' | 'age'
+type StringKeys = KeysOfType<User, string>; // 'name'
+type NumberKeys = KeysOfType<User, number>; // 'id' | 'age'
 
 // Use in generic function
 function getStringValue<T, K extends KeysOfType<T, string>>(
   obj: T,
-  key: K
+  key: K,
 ): string {
   return obj[key] as string;
 }
 
-const user: User = { id: 1, name: 'Alice', age: 30, active: true };
-getStringValue(user, 'name');    // ✓
-getStringValue(user, 'age');     // ❌ Error: 'age' is not string key
+const user: User = { id: 1, name: "Alice", age: 30, active: true };
+getStringValue(user, "name"); // ✓
+getStringValue(user, "age"); // ❌ Error: 'age' is not string key
 ```
 
 ## Variance in Generics
@@ -356,13 +354,13 @@ interface Dog extends Animal {
 let animals: Animal[] = [];
 let dogs: Dog[] = [];
 
-animals = dogs;  // ✓ Dog[] is subtype of Animal[]
+animals = dogs; // ✓ Dog[] is subtype of Animal[]
 
 // Promises are covariant
 let animalPromise: Promise<Animal>;
 let dogPromise: Promise<Dog>;
 
-animalPromise = dogPromise;  // ✓ Promise<Dog> is subtype of Promise<Animal>
+animalPromise = dogPromise; // ✓ Promise<Dog> is subtype of Promise<Animal>
 ```
 
 ### Contravariance (Function Parameters)
@@ -378,8 +376,8 @@ let animalHandler: Handler<Animal>;
 let dogHandler: Handler<Dog>;
 
 // Contravariant (with strictFunctionTypes: true)
-dogHandler = animalHandler;  // ✓ Can use Animal handler for Dogs
-animalHandler = dogHandler;  // ❌ Can't use Dog handler for Animals
+dogHandler = animalHandler; // ✓ Can use Animal handler for Dogs
+animalHandler = dogHandler; // ❌ Can't use Dog handler for Animals
 ```
 
 ### Invariance (Mutable Containers)
@@ -397,8 +395,8 @@ interface Cage<T> {
 let animalCage: Cage<Animal>;
 let dogCage: Cage<Dog>;
 
-animalCage = dogCage;  // ❌ Invariant
-dogCage = animalCage;  // ❌ Invariant
+animalCage = dogCage; // ❌ Invariant
+dogCage = animalCage; // ❌ Invariant
 
 // Why? Both get (covariant) and set (contravariant)
 ```
@@ -417,15 +415,14 @@ TypeScript has a limit on type instantiation depth (default 50).
 
 ```typescript
 // Problematic: Deep recursion
-type DeepNested<T, N extends number = 0> =
-  N extends 50
-    ? T
-    : { value: DeepNested<T, /* increment N */> };
+type DeepNested<T, N extends number = 0> = N extends 50
+  ? T
+  : { value: DeepNested<T /* increment N */> };
 
 // Better: Limit recursion explicitly
 type SafeNested<T, Depth extends number = 5> = Depth extends 0
   ? T
-  : { value: SafeNested<T, /* decrement */> };
+  : { value: SafeNested<T /* decrement */> };
 ```
 
 ### Type Instantiation Limit
@@ -434,14 +431,10 @@ Some types generate MASSIVE numbers of instantiations. Distributive conditional 
 
 ```typescript
 // Bad: Creates many instantiations
-type BadUnion<T> = T extends any
-  ? { [K in keyof T]: BadUnion<T[K]> }
-  : never;
+type BadUnion<T> = T extends any ? { [K in keyof T]: BadUnion<T[K]> } : never;
 
 // Better: Avoid unnecessary instantiations
-type GoodUnion<T> = T extends object
-  ? { [K in keyof T]: T[K] }
-  : T;
+type GoodUnion<T> = T extends object ? { [K in keyof T]: T[K] } : T;
 ```
 
 ### Caching with Type Aliases
@@ -450,9 +443,7 @@ TypeScript recomputes complex conditional types every time they're referenced. I
 
 ```typescript
 // Slow: Recomputes every time
-function process<T>(
-  value: T extends string ? string[] : number[]
-) {
+function process<T>(value: T extends string ? string[] : number[]) {
   // ...
 }
 
@@ -470,8 +461,8 @@ Create a function that picks multiple properties safely:
 
 ```typescript
 // Goal:
-const user = { id: 1, name: 'Alice', age: 30, email: 'alice@example.com' };
-const picked = pick(user, ['name', 'email']);
+const user = { id: 1, name: "Alice", age: 30, email: "alice@example.com" };
+const picked = pick(user, ["name", "email"]);
 // Type: { name: string; email: string }
 ```
 
@@ -490,11 +481,11 @@ function pick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
 }
 
 // Usage:
-const user = { id: 1, name: 'Alice', age: 30, email: 'a@example.com' };
-const picked = pick(user, ['name', 'email']);
+const user = { id: 1, name: "Alice", age: 30, email: "a@example.com" };
+const picked = pick(user, ["name", "email"]);
 // Type: { name: string; email: string }
 
-pick(user, ['name', 'invalid']);  // ❌ Error: 'invalid' not in user
+pick(user, ["name", "invalid"]); // ❌ Error: 'invalid' not in user
 ```
 
 </details>
@@ -539,12 +530,12 @@ interface CacheSchema {
 
 const cache = new TypedCache<CacheSchema>();
 
-cache.set('user', { id: 1, name: 'Alice' });  // ✓
-cache.set('count', 42);                       // ✓
-cache.set('user', 'invalid');                 // ❌ Error: wrong type
+cache.set("user", { id: 1, name: "Alice" }); // ✓
+cache.set("count", 42); // ✓
+cache.set("user", "invalid"); // ❌ Error: wrong type
 
-const user = cache.get('user');  // Type: { id: number; name: string } | undefined
-const count = cache.get('count');  // Type: number | undefined
+const user = cache.get("user"); // Type: { id: number; name: string } | undefined
+const count = cache.get("count"); // Type: number | undefined
 ```
 
 </details>
@@ -557,7 +548,7 @@ Create a generic async map function:
 // Goal: Map array with async function
 async function asyncMap<T, U>(
   arr: T[],
-  fn: (item: T) => Promise<U>
+  fn: (item: T) => Promise<U>,
 ): Promise<U[]> {
   // Implement
 }
@@ -574,7 +565,7 @@ const users = await asyncMap(ids, async (id) => fetchUser(id));
 ```typescript
 async function asyncMap<T, U>(
   arr: T[],
-  fn: (item: T, index: number) => Promise<U>
+  fn: (item: T, index: number) => Promise<U>,
 ): Promise<U[]> {
   return Promise.all(arr.map(fn));
 }
@@ -582,7 +573,7 @@ async function asyncMap<T, U>(
 // Alternative: Sequential processing
 async function asyncMapSeq<T, U>(
   arr: T[],
-  fn: (item: T, index: number) => Promise<U>
+  fn: (item: T, index: number) => Promise<U>,
 ): Promise<U[]> {
   const results: U[] = [];
 
@@ -618,11 +609,11 @@ This tests deep understanding of generics. Many developers think `<T extends str
 ```typescript
 function log<T extends string | number>(value: T): T {
   console.log(value);
-  return value;  // Returns exact type (string or number)
+  return value; // Returns exact type (string or number)
 }
 
-const x = log('hello');  // Type: "hello" (literal)
-const y = log(42);       // Type: 42 (literal)
+const x = log("hello"); // Type: "hello" (literal)
+const y = log(42); // Type: 42 (literal)
 ```
 
 **Union**: Single type that's one of several options.
@@ -630,11 +621,11 @@ const y = log(42);       // Type: 42 (literal)
 ```typescript
 function log(value: string | number): string | number {
   console.log(value);
-  return value;  // Returns union type
+  return value; // Returns union type
 }
 
-const x = log('hello');  // Type: string | number
-const y = log(42);       // Type: string | number
+const x = log("hello"); // Type: string | number
+const y = log(42); // Type: string | number
 ```
 
 **Key difference**: Generic preserves specific type through the function.
@@ -649,6 +640,7 @@ Tests API design judgment. Default parameters make common cases convenient, but 
 <summary>Answer</summary>
 
 Use defaults when:
+
 1. Most common case is predictable
 2. Making all callsites explicit is tedious
 3. Backward compatibility
@@ -666,7 +658,8 @@ class Component<Props = {}, State = {}> {
 }
 
 // Bad: No clear default
-interface Box<T = any> {  // 'any' is rarely a good default
+interface Box<T = any> {
+  // 'any' is rarely a good default
   value: T;
 }
 ```
@@ -681,6 +674,7 @@ This separates those who use generics from those who understand them. Inference 
 <summary>Answer</summary>
 
 Inference process:
+
 1. From call site arguments
 2. Best common type if multiple sources
 3. Falls back to constraint or default
@@ -691,12 +685,12 @@ function combine<T>(a: T, b: T): T[] {
   return [a, b];
 }
 
-combine(1, 2);         // T = number
-combine('a', 1);       // T = string | number (best common)
-combine<string>('a', 1);  // ❌ Error: 1 not assignable to string
+combine(1, 2); // T = number
+combine("a", 1); // T = string | number (best common)
+combine<string>("a", 1); // ❌ Error: 1 not assignable to string
 
 // Can't infer from return type:
-const result: string[] = combine(1, 2);  // ❌ Still infers T = number
+const result: string[] = combine(1, 2); // ❌ Still infers T = number
 ```
 
 </details>
@@ -711,20 +705,20 @@ Advanced question that reveals depth of type system knowledge. Variance is subtl
 **Covariant** (read-only): `Dog[]` → `Animal[]`
 
 ```typescript
-let animals: Animal[] = dogs;  // ✓ Reading Dog as Animal is safe
+let animals: Animal[] = dogs; // ✓ Reading Dog as Animal is safe
 ```
 
 **Contravariant** (write-only): `Animal handler` → `Dog handler`
 
 ```typescript
-let dogHandler: (d: Dog) => void = (a: Animal) => {};  // ✓ Safe
+let dogHandler: (d: Dog) => void = (a: Animal) => {}; // ✓ Safe
 ```
 
 **Invariant** (read-write): Neither direction allowed
 
 ```typescript
 interface Box<T> {
-  get(): T;     // Covariant position
+  get(): T; // Covariant position
   set(T): void; // Contravariant position
 }
 // Result: Invariant (can't assign either direction)
@@ -748,6 +742,7 @@ interface Box<T> {
 ## Next Steps
 
 In [Lesson 06: Module Systems](lesson-06-module-systems.md), you'll learn:
+
 - ESM vs CommonJS differences
 - Module resolution strategies
 - Import/export patterns and best practices

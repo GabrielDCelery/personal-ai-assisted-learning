@@ -19,6 +19,7 @@ export function add(a: number, b: number): number;
 ```
 
 **Use cases**:
+
 1. Type JavaScript libraries
 2. Publish types with npm packages
 3. Share types across projects
@@ -91,11 +92,9 @@ interface User {
   email?: string;
 }
 
-type Status = 'pending' | 'active' | 'inactive';
+type Status = "pending" | "active" | "inactive";
 
-type Result<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+type Result<T> = { success: true; data: T } | { success: false; error: string };
 ```
 
 ## Module Declarations
@@ -142,9 +141,10 @@ declare namespace MyLib {
 ```
 
 Usage:
+
 ```typescript
-import MyLib = require('my-lib');
-const lib = new MyLib({ apiKey: 'xxx' });
+import MyLib = require("my-lib");
+const lib = new MyLib({ apiKey: "xxx" });
 ```
 
 ### UMD (Universal Module Definition)
@@ -153,7 +153,7 @@ The "works everywhere" pattern for libraries that support both module imports an
 
 ```typescript
 // my-lib.d.ts
-export as namespace MyLib;  // Global variable when loaded via script tag
+export as namespace MyLib; // Global variable when loaded via script tag
 
 export interface Config {
   apiKey: string;
@@ -163,12 +163,13 @@ export function initialize(config: Config): void;
 ```
 
 Usage:
+
 ```typescript
 // As module
-import { initialize } from 'my-lib';
+import { initialize } from "my-lib";
 
 // As global (script tag)
-MyLib.initialize({ apiKey: 'xxx' });
+MyLib.initialize({ apiKey: "xxx" });
 ```
 
 ## Ambient Declarations
@@ -183,13 +184,13 @@ You `npm install untyped-library` but there's no @types package. TypeScript erro
 
 ```typescript
 // globals.d.ts
-declare module 'untyped-library' {
+declare module "untyped-library" {
   export function doSomething(value: string): number;
   export const version: string;
 }
 
 // Now can import:
-import { doSomething } from 'untyped-library';
+import { doSomething } from "untyped-library";
 ```
 
 ### Wildcard Module Declarations
@@ -198,25 +199,25 @@ You `import styles from './app.css'` or `import logo from './logo.png'` in webpa
 
 ```typescript
 // For importing non-JS files
-declare module '*.css' {
+declare module "*.css" {
   const content: { [className: string]: string };
   export default content;
 }
 
-declare module '*.png' {
+declare module "*.png" {
   const value: string;
   export default value;
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: any;
   export default value;
 }
 
 // Usage:
-import styles from './app.css';
-import logo from './logo.png';
-import data from './config.json';
+import styles from "./app.css";
+import logo from "./logo.png";
+import data from "./config.json";
 ```
 
 ### Global Augmentation
@@ -248,11 +249,13 @@ export {};
 ```
 
 Usage:
+
 ```typescript
-window.myApp.version;     // ✓ Type-safe
+window.myApp.version; // ✓ Type-safe
 process.env.DATABASE_URL; // ✓ Type-safe
-if (DEBUG) {              // ✓ Type-safe
-  console.log('Debug mode');
+if (DEBUG) {
+  // ✓ Type-safe
+  console.log("Debug mode");
 }
 ```
 
@@ -270,7 +273,7 @@ Tells TypeScript to include types from a specific @types package. Useful in .d.t
 /// <reference types="node" />
 
 // Now Node.js types are available
-const buffer: Buffer = Buffer.from('hello');
+const buffer: Buffer = Buffer.from("hello");
 ```
 
 ### Reference Path
@@ -316,6 +319,7 @@ my-package/
 ```
 
 **package.json**:
+
 ```json
 {
   "name": "my-package",
@@ -329,11 +333,12 @@ my-package/
 ```
 
 **tsconfig.json**:
+
 ```json
 {
   "compilerOptions": {
-    "declaration": true,      // Generate .d.ts
-    "declarationMap": true,   // Generate .d.ts.map
+    "declaration": true, // Generate .d.ts
+    "declarationMap": true, // Generate .d.ts.map
     "outDir": "./dist"
   }
 }
@@ -400,7 +405,7 @@ export function get(key: string, fallback?: string): string | undefined;
 
 // ❌ Incorrect mutability
 export interface Config {
-  apiKey: string;  // Can be reassigned
+  apiKey: string; // Can be reassigned
 }
 
 // ❌ Poor generic constraints
@@ -435,8 +440,8 @@ export namespace JQuery {
 
 // Usage:
 declare const $: JQuery;
-$.text('hello');
-JQuery.ajax({ url: '/api' });
+$.text("hello");
+JQuery.ajax({ url: "/api" });
 ```
 
 ### Conditional Types in Declarations
@@ -449,8 +454,8 @@ export type AsyncOrSync<T> = T extends Promise<any> ? T : Promise<T>;
 export function wrap<T>(value: T): AsyncOrSync<T>;
 
 // Usage:
-const a = wrap(42);              // Promise<number>
-const b = wrap(Promise.resolve(42));  // Promise<number>
+const a = wrap(42); // Promise<number>
+const b = wrap(Promise.resolve(42)); // Promise<number>
 ```
 
 ### Branded Types
@@ -459,8 +464,8 @@ String IDs all look the same to TypeScript: `UserId` and `PostId` are both `stri
 
 ```typescript
 // Prevent mixing different ID types
-export type UserId = string & { __brand: 'UserId' };
-export type PostId = string & { __brand: 'PostId' };
+export type UserId = string & { __brand: "UserId" };
+export type PostId = string & { __brand: "PostId" };
 
 export function getUserById(id: UserId): User;
 export function getPostById(id: PostId): Post;
@@ -469,8 +474,8 @@ export function getPostById(id: PostId): Post;
 declare const userId: UserId;
 declare const postId: PostId;
 
-getUserById(userId);   // ✓
-getUserById(postId);   // ❌ Error
+getUserById(userId); // ✓
+getUserById(postId); // ❌ Error
 ```
 
 ## DefinitelyTyped Contribution
@@ -521,15 +526,15 @@ Example usage that must type-check. This proves your declarations work. Not runt
 
 ```typescript
 // my-library-tests.ts
-import { connect, Options } from 'my-library';
+import { connect, Options } from "my-library";
 
 const options: Options = {
   timeout: 5000,
-  retries: 3
+  retries: 3,
 };
 
-connect('ws://localhost', options).then(conn => {
-  conn.send('hello');
+connect("ws://localhost", options).then((conn) => {
+  conn.send("hello");
   conn.close();
 });
 ```
@@ -551,10 +556,7 @@ Strict compiler settings required by DefinitelyTyped. `noImplicitAny`, `strictNu
     "noEmit": true,
     "forceConsistentCasingInFileNames": true
   },
-  "files": [
-    "index.d.ts",
-    "my-library-tests.ts"
-  ]
+  "files": ["index.d.ts", "my-library-tests.ts"]
 }
 ```
 
@@ -617,12 +619,13 @@ declare namespace Cache {
 ```
 
 Usage:
+
 ```typescript
-import Cache = require('./cache');
+import Cache = require("./cache");
 
 const cache = new Cache<string, number>({ maxSize: 50 });
-cache.set('count', 42, 1000);
-const value = cache.get('count');  // number | undefined
+cache.set("count", 42, 1000);
+const value = cache.get("count"); // number | undefined
 ```
 
 </details>
@@ -633,9 +636,9 @@ Add custom properties to Express Request:
 
 ```typescript
 // Goal: Make these type-safe
-app.get('/', (req, res) => {
-  const userId = req.userId;     // Should be string
-  const session = req.session;   // Should be Session
+app.get("/", (req, res) => {
+  const userId = req.userId; // Should be string
+  const session = req.session; // Should be Session
 });
 ```
 
@@ -644,7 +647,7 @@ app.get('/', (req, res) => {
 
 ```typescript
 // types/express.d.ts
-import { Session } from './session';
+import { Session } from "./session";
 
 declare global {
   namespace Express {
@@ -660,11 +663,12 @@ export {};
 ```
 
 Or with module augmentation:
+
 ```typescript
 // types/express-augmentation.d.ts
-import { Session } from './session';
+import { Session } from "./session";
 
-declare module 'express-serve-static-core' {
+declare module "express-serve-static-core" {
   interface Request {
     userId: string;
     session: Session;
@@ -692,7 +696,7 @@ declare const jQuery: {
 };
 
 // Declaring module without implementation
-declare module 'my-untyped-lib' {
+declare module "my-untyped-lib" {
   export function doThing(): void;
 }
 
@@ -727,14 +731,15 @@ declare namespace MyLib {
 }
 
 // Usage:
-import MyLib = require('my-lib');
+import MyLib = require("my-lib");
 
-MyLib();           // Default
-MyLib.bar();       // Named
-MyLib.version;     // Named
+MyLib(); // Default
+MyLib.bar(); // Named
+MyLib.version; // Named
 ```
 
 For ESM:
+
 ```typescript
 declare const myLib: {
   (): void;
@@ -757,6 +762,7 @@ Reveals practical understanding of npm package types vs community types. Candida
 <summary>Answer</summary>
 
 **Built-in types** (with package):
+
 ```json
 // package.json
 {
@@ -764,12 +770,15 @@ Reveals practical understanding of npm package types vs community types. Candida
   "types": "./dist/index.d.ts"
 }
 ```
+
 Published together, always in sync.
 
 **@types packages** (separate):
+
 ```bash
 npm install @types/my-lib
 ```
+
 Community-maintained, may lag behind library updates.
 
 **Preference**: Use built-in types when available. Use @types for libraries without types.
@@ -797,6 +806,7 @@ Special comments for compiler instructions.
 ```
 
 **Modern alternative**: Use tsconfig.json:
+
 ```json
 {
   "compilerOptions": {
@@ -821,6 +831,7 @@ Special comments for compiler instructions.
 ## Next Steps
 
 In [Lesson 08: Publishing npm Packages](lesson-08-publishing-npm-packages.md), you'll learn:
+
 - Build setup for dual ESM/CJS publishing
 - Version management and semver
 - npm publishing workflow

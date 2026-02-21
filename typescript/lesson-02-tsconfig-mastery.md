@@ -13,21 +13,21 @@ Strict mode flips TypeScript from "helpful suggestions" to "your code is provabl
 ```json
 {
   "compilerOptions": {
-    "strict": true  // Enables ALL strict options below
+    "strict": true // Enables ALL strict options below
   }
 }
 ```
 
-| Option | What it does | Common pitfall |
-|--------|--------------|----------------|
-| `strict` | Enables all strict options | Turn this on, fix issues individually |
-| `noImplicitAny` | Error on `any` inference | `function foo(x)` → error |
-| `strictNullChecks` | null/undefined are distinct types | `string` ≠ `string \| null` |
-| `strictFunctionTypes` | Function parameters are contravariant | Catches unsafe callbacks |
-| `strictBindCallApply` | Type-check bind/call/apply | `fn.call(this, 'wrong')` → error |
-| `strictPropertyInitialization` | Class properties must be initialized | Must set in constructor or `!:` |
-| `noImplicitThis` | Error on implicit `this: any` | Methods need explicit `this` param |
-| `alwaysStrict` | Emit `"use strict"` | Good for ES5 targets |
+| Option                         | What it does                          | Common pitfall                        |
+| ------------------------------ | ------------------------------------- | ------------------------------------- |
+| `strict`                       | Enables all strict options            | Turn this on, fix issues individually |
+| `noImplicitAny`                | Error on `any` inference              | `function foo(x)` → error             |
+| `strictNullChecks`             | null/undefined are distinct types     | `string` ≠ `string \| null`           |
+| `strictFunctionTypes`          | Function parameters are contravariant | Catches unsafe callbacks              |
+| `strictBindCallApply`          | Type-check bind/call/apply            | `fn.call(this, 'wrong')` → error      |
+| `strictPropertyInitialization` | Class properties must be initialized  | Must set in constructor or `!:`       |
+| `noImplicitThis`               | Error on implicit `this: any`         | Methods need explicit `this` param    |
+| `alwaysStrict`                 | Emit `"use strict"`                   | Good for ES5 targets                  |
 
 ### Example: strictNullChecks Impact
 
@@ -35,14 +35,14 @@ The billion-dollar mistake (Tony Hoare's words, not mine) is allowing null to in
 
 ```typescript
 // strictNullChecks: false
-let name: string = null;  // ✓ Allowed (dangerous!)
-name.toLowerCase();       // Runtime error!
+let name: string = null; // ✓ Allowed (dangerous!)
+name.toLowerCase(); // Runtime error!
 
 // strictNullChecks: true
-let name: string = null;  // ❌ Error: Type 'null' is not assignable to type 'string'
-let name: string | null = null;  // ✓ Correct
+let name: string = null; // ❌ Error: Type 'null' is not assignable to type 'string'
+let name: string | null = null; // ✓ Correct
 if (name !== null) {
-  name.toLowerCase();  // ✓ Safe, TypeScript knows name is string here
+  name.toLowerCase(); // ✓ Safe, TypeScript knows name is string here
 }
 ```
 
@@ -57,31 +57,31 @@ That's where `target` and `module` split the problem: `target` controls JavaScri
 ```json
 {
   "compilerOptions": {
-    "target": "ES2020",     // Output JavaScript version
-    "module": "NodeNext",   // Module system
-    "lib": ["ES2020"]       // Available APIs
+    "target": "ES2020", // Output JavaScript version
+    "module": "NodeNext", // Module system
+    "lib": ["ES2020"] // Available APIs
   }
 }
 ```
 
-| Option | Value | Use Case |
-|--------|-------|----------|
-| `target` | `ES5`, `ES6`, `ES2020`, `ESNext` | Browser/Node compatibility |
-| `module` | `CommonJS`, `ESNext`, `NodeNext`, `Node16` | Module system |
-| `lib` | `ES2015`, `DOM`, `ES2020`, etc. | Available global APIs |
+| Option   | Value                                      | Use Case                   |
+| -------- | ------------------------------------------ | -------------------------- |
+| `target` | `ES5`, `ES6`, `ES2020`, `ESNext`           | Browser/Node compatibility |
+| `module` | `CommonJS`, `ESNext`, `NodeNext`, `Node16` | Module system              |
+| `lib`    | `ES2015`, `DOM`, `ES2020`, etc.            | Available global APIs      |
 
 ### Module Strategies
 
 ```typescript
 // module: "CommonJS"
-import { foo } from './bar';
+import { foo } from "./bar";
 // Becomes:
 const bar_1 = require("./bar");
 
 // module: "ESNext" or "ES2020"
-import { foo } from './bar';
+import { foo } from "./bar";
 // Stays as:
-import { foo } from './bar';
+import { foo } from "./bar";
 
 // module: "NodeNext" (recommended for modern Node)
 // Respects package.json "type" field
@@ -93,12 +93,13 @@ This question separates developers who cargo-cult config from those who understa
 
 ```json
 {
-  "target": "ES5",          // Output code will be ES5
-  "lib": ["ES2015", "DOM"]  // But can USE ES2015 APIs in source
+  "target": "ES5", // Output code will be ES5
+  "lib": ["ES2015", "DOM"] // But can USE ES2015 APIs in source
 }
 ```
 
 TypeScript will:
+
 - Compile to ES5 syntax
 - Allow ES2015 APIs (Promise, Map, etc.) in your code
 - Assume polyfills exist at runtime
@@ -117,11 +118,11 @@ The resolution strategy tells TypeScript how to interpret imports. `node` uses c
 }
 ```
 
-| Strategy | When to Use | Behavior |
-|----------|-------------|----------|
-| `node` (legacy) | Old projects | Classic Node resolution |
-| `node16` / `nodenext` | Modern Node (16+) | Respects package.json `exports` |
-| `bundler` | Webpack/Vite projects | Like `node16` but relaxed |
+| Strategy              | When to Use           | Behavior                        |
+| --------------------- | --------------------- | ------------------------------- |
+| `node` (legacy)       | Old projects          | Classic Node resolution         |
+| `node16` / `nodenext` | Modern Node (16+)     | Respects package.json `exports` |
+| `bundler`             | Webpack/Vite projects | Like `node16` but relaxed       |
 
 ### Resolution Example
 
@@ -134,14 +135,14 @@ src/
 
 ```typescript
 // app.ts
-import { helper } from './utils';
+import { helper } from "./utils";
 
 // moduleResolution: "node"
 // Resolves to: ./utils/index.ts ✓
 
 // moduleResolution: "node16" with type: "module"
 // ❌ Error! Must use explicit extension:
-import { helper } from './utils/index.js';  // ✓
+import { helper } from "./utils/index.js"; // ✓
 // Note: .js extension even though file is .ts!
 ```
 
@@ -156,11 +157,11 @@ The answer is that TypeScript isn't running your code - Node is. TypeScript comp
 // package.json: { "type": "module" }
 
 // ❌ Wrong
-import { foo } from './bar';
-import { foo } from './bar.ts';
+import { foo } from "./bar";
+import { foo } from "./bar.ts";
 
 // ✓ Correct
-import { foo } from './bar.js';  // Yes, .js even for .ts files!
+import { foo } from "./bar.js"; // Yes, .js even for .ts files!
 ```
 
 **Why?** TypeScript emits .js files, and Node resolves the emitted .js files.
@@ -186,10 +187,10 @@ Path mapping creates import aliases that look like package names: `@components/B
 
 ```typescript
 // Before
-import { Button } from '../../../components/Button';
+import { Button } from "../../../components/Button";
 
 // After
-import { Button } from '@components/Button';
+import { Button } from "@components/Button";
 ```
 
 ### Important: Paths Don't Rewrite Imports!
@@ -197,6 +198,7 @@ import { Button } from '@components/Button';
 TypeScript uses `paths` for **type-checking only**. At runtime, you need a bundler or runtime tool to resolve them.
 
 **Solutions**:
+
 - Bundlers (Webpack, Vite): Handle automatically
 - Node: Use `tsconfig-paths` package
 - Build: Use `tsc-alias` to rewrite after compilation
@@ -226,10 +228,7 @@ monorepo/
 ```json
 {
   "files": [],
-  "references": [
-    { "path": "./packages/core" },
-    { "path": "./packages/utils" }
-  ]
+  "references": [{ "path": "./packages/core" }, { "path": "./packages/utils" }]
 }
 ```
 
@@ -238,15 +237,15 @@ monorepo/
 ```json
 {
   "compilerOptions": {
-    "composite": true,           // Required for project references
-    "declaration": true,          // Required for project references
-    "declarationMap": true,       // Helpful for debugging
+    "composite": true, // Required for project references
+    "declaration": true, // Required for project references
+    "declarationMap": true, // Helpful for debugging
     "outDir": "./dist",
     "rootDir": "./src"
   },
   "include": ["src/**/*"],
   "references": [
-    { "path": "../utils" }        // core depends on utils
+    { "path": "../utils" } // core depends on utils
   ]
 }
 ```
@@ -265,6 +264,7 @@ tsc --build --clean
 ```
 
 **Benefits**:
+
 - Faster incremental builds
 - Better editor performance
 - Enforces dependency boundaries
@@ -277,13 +277,13 @@ tsc --build --clean
 ```json
 {
   "compilerOptions": {
-    "outDir": "./dist",               // Output directory
-    "rootDir": "./src",               // Input directory (mirrors structure)
-    "declaration": true,              // Generate .d.ts files
-    "declarationMap": true,           // Generate .d.ts.map for IDE navigation
-    "sourceMap": true,                // Generate .js.map for debugging
-    "removeComments": true,           // Strip comments from output
-    "emitDeclarationOnly": false      // Only emit .d.ts (no .js)
+    "outDir": "./dist", // Output directory
+    "rootDir": "./src", // Input directory (mirrors structure)
+    "declaration": true, // Generate .d.ts files
+    "declarationMap": true, // Generate .d.ts.map for IDE navigation
+    "sourceMap": true, // Generate .js.map for debugging
+    "removeComments": true, // Strip comments from output
+    "emitDeclarationOnly": false // Only emit .d.ts (no .js)
   }
 }
 ```
@@ -293,11 +293,11 @@ tsc --build --clean
 ```json
 {
   "compilerOptions": {
-    "esModuleInterop": true,          // Enable default imports from CommonJS
-    "allowSyntheticDefaultImports": true,  // Type-check synthetic defaults
-    "isolatedModules": true,          // Each file must be self-contained (for bundlers)
-    "forceConsistentCasingInFileNames": true,  // Prevent case-sensitivity issues
-    "skipLibCheck": true              // Skip type-checking .d.ts files (faster builds)
+    "esModuleInterop": true, // Enable default imports from CommonJS
+    "allowSyntheticDefaultImports": true, // Type-check synthetic defaults
+    "isolatedModules": true, // Each file must be self-contained (for bundlers)
+    "forceConsistentCasingInFileNames": true, // Prevent case-sensitivity issues
+    "skipLibCheck": true // Skip type-checking .d.ts files (faster builds)
   }
 }
 ```
@@ -306,12 +306,12 @@ tsc --build --clean
 
 ```typescript
 // Without esModuleInterop
-import * as express from 'express';
-const app = express();  // ❌ Error: express is not a function
+import * as express from "express";
+const app = express(); // ❌ Error: express is not a function
 
 // With esModuleInterop: true
-import express from 'express';
-const app = express();  // ✓ Works!
+import express from "express";
+const app = express(); // ✓ Works!
 ```
 
 ### Strict Checking (Beyond strict: true)
@@ -319,13 +319,13 @@ const app = express();  // ✓ Works!
 ```json
 {
   "compilerOptions": {
-    "strict": true,                   // Base strict checking
-    "noUnusedLocals": true,           // Error on unused variables
-    "noUnusedParameters": true,       // Error on unused function params
-    "noImplicitReturns": true,        // All code paths must return
-    "noFallthroughCasesInSwitch": true,  // Switch cases must break/return
+    "strict": true, // Base strict checking
+    "noUnusedLocals": true, // Error on unused variables
+    "noUnusedParameters": true, // Error on unused function params
+    "noImplicitReturns": true, // All code paths must return
+    "noFallthroughCasesInSwitch": true, // Switch cases must break/return
     "noUncheckedIndexedAccess": true, // array[i] returns T | undefined
-    "noPropertyAccessFromIndexSignature": true,  // obj.foo vs obj["foo"]
+    "noPropertyAccessFromIndexSignature": true, // obj.foo vs obj["foo"]
     "allowUnusedLabels": false,
     "allowUnreachableCode": false
   }
@@ -348,7 +348,7 @@ function getUser(id: number): User {
   if (id > 0) {
     return fetchUser(id);
   }
-  throw new Error('Invalid ID');  // ✓ All paths covered
+  throw new Error("Invalid ID"); // ✓ All paths covered
 }
 ```
 
@@ -357,15 +357,15 @@ function getUser(id: number): User {
 ```typescript
 // noUncheckedIndexedAccess: false
 const arr = [1, 2, 3];
-const val = arr[10];  // Type: number (dangerous!)
-val.toFixed();        // Runtime error!
+const val = arr[10]; // Type: number (dangerous!)
+val.toFixed(); // Runtime error!
 
 // noUncheckedIndexedAccess: true
 const arr = [1, 2, 3];
-const val = arr[10];  // Type: number | undefined ✓
-val.toFixed();        // ❌ Error: possibly undefined
+const val = arr[10]; // Type: number | undefined ✓
+val.toFixed(); // ❌ Error: possibly undefined
 if (val !== undefined) {
-  val.toFixed();      // ✓ Safe
+  val.toFixed(); // ✓ Safe
 }
 ```
 
@@ -374,12 +374,12 @@ if (val !== undefined) {
 ```json
 {
   "include": [
-    "src/**/*"              // All files in src/
+    "src/**/*" // All files in src/
   ],
   "exclude": [
-    "node_modules",         // Always excluded by default
+    "node_modules", // Always excluded by default
     "dist",
-    "**/*.spec.ts",         // Exclude test files
+    "**/*.spec.ts", // Exclude test files
     "**/__tests__/**"
   ]
 }
@@ -403,7 +403,7 @@ class Person {
   age: number;
 }
 
-const names: string[] = ['Alice', 'Bob'];
+const names: string[] = ["Alice", "Bob"];
 console.log(names[5].toLowerCase());
 ```
 
@@ -420,7 +420,7 @@ function getUserName(user: User): string | undefined {
   if (user.name) {
     return user.name.toUpperCase();
   }
-  return undefined;  // noImplicitReturns
+  return undefined; // noImplicitReturns
 }
 
 // Fix 2: Initialize class properties (strictPropertyInitialization)
@@ -436,12 +436,12 @@ class Person {
 
 // Or use definite assignment assertion
 class Person {
-  name!: string;  // I promise to initialize this
+  name!: string; // I promise to initialize this
   age!: number;
 }
 
 // Fix 3: Handle undefined (noUncheckedIndexedAccess)
-const names: string[] = ['Alice', 'Bob'];
+const names: string[] = ["Alice", "Bob"];
 const name = names[5];
 if (name !== undefined) {
   console.log(name.toLowerCase());
@@ -455,6 +455,7 @@ console.log(names[5]?.toLowerCase());
 ## Hands-On Exercise 2: Configure for Modern Node
 
 Create tsconfig.json for a Node 18+ project with:
+
 - Full strict checking
 - ESM modules
 - Path aliases
@@ -509,6 +510,7 @@ Create tsconfig.json for a Node 18+ project with:
 ```
 
 **package.json**:
+
 ```json
 {
   "type": "module",
@@ -540,9 +542,9 @@ This question reveals whether you understand what TypeScript actually does (tran
 
 ```json
 {
-  "target": "ES5",          // Old browsers
-  "module": "CommonJS",     // Node.js
-  "lib": ["ES2015", "DOM"]  // Can use Promise, Map, etc.
+  "target": "ES5", // Old browsers
+  "module": "CommonJS", // Node.js
+  "lib": ["ES2015", "DOM"] // Can use Promise, Map, etc.
 }
 ```
 
@@ -558,11 +560,14 @@ Interviewers ask this to see if you've worked with modern build tools. It shows 
 Required for build tools that transpile files independently (Babel, esbuild, SWC).
 
 **What it enforces**:
+
 ```typescript
 // ❌ Error with isolatedModules: true
-const enum Foo { A = 1 }  // Can't inline across files
+const enum Foo {
+  A = 1,
+} // Can't inline across files
 
-export { SomeType };  // ❌ Re-exporting type without type keyword
+export { SomeType }; // ❌ Re-exporting type without type keyword
 
 // ✓ Correct
 export type { SomeType };
@@ -584,6 +589,7 @@ This separates pragmatic developers from purists. It's a performance vs correctn
 Skips type-checking in `.d.ts` files from `node_modules`.
 
 **Why?**
+
 - Faster compilation (skip checking 3rd party types)
 - Avoid errors in dependencies you can't fix
 - Your code is still fully type-checked
@@ -600,6 +606,7 @@ Skips type-checking in `.d.ts` files from `node_modules`.
 Enables TypeScript project references. Required for multi-package projects.
 
 **Effects**:
+
 - Enables incremental compilation
 - Generates `.tsbuildinfo` cache file
 - Requires `declaration: true`
@@ -625,7 +632,7 @@ This is the #1 "gotcha" question for modern Node + TypeScript setups. Every deve
 
 ```typescript
 // file.ts
-import { foo } from './bar.js';  // Not a typo!
+import { foo } from "./bar.js"; // Not a typo!
 ```
 
 **Reason**: TypeScript emits `.js` files, and Node resolves imports in the emitted code.
@@ -653,7 +660,7 @@ If you wrote `'./bar.ts'`, Node would look for `bar.ts.js` (wrong).
 ```
 
 ```typescript
-import { foo } from '@utils/bar';  // ✓ TypeScript happy
+import { foo } from "@utils/bar"; // ✓ TypeScript happy
 // Runtime: ❌ Error: Cannot find module '@utils/bar'
 ```
 
@@ -675,7 +682,7 @@ import { foo } from '@utils/bar';  // ✓ TypeScript happy
 
 ```json
 {
-  "declaration": false  // ❌ Libraries need .d.ts files!
+  "declaration": false // ❌ Libraries need .d.ts files!
 }
 ```
 
@@ -725,7 +732,7 @@ import { foo } from '@utils/bar';  // ✓ TypeScript happy
     "target": "ES2020",
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "jsx": "react-jsx",  // or "preserve" for Vue
+    "jsx": "react-jsx", // or "preserve" for Vue
     "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
@@ -749,6 +756,7 @@ import { foo } from '@utils/bar';  // ✓ TypeScript happy
 ## Next Steps
 
 In [Lesson 03: Type System Internals](lesson-03-type-system-internals.md), you'll learn:
+
 - Type inference and widening
 - Type narrowing techniques
 - Structural vs nominal typing

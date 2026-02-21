@@ -29,10 +29,11 @@ function updateUser(id: number, updates: Partial<User>) {
   // Can pass any subset of properties
 }
 
-updateUser(1, { age: 30 });  // ✓ Only updating age
+updateUser(1, { age: 30 }); // ✓ Only updating age
 ```
 
 **Implementation**:
+
 ```typescript
 type Partial<T> = {
   [P in keyof T]?: T[P];
@@ -61,9 +62,10 @@ function validateConfig(config: Required<Config>) {
 ```
 
 **Implementation**:
+
 ```typescript
 type Required<T> = {
-  [P in keyof T]-?: T[P];  // -? removes optionality
+  [P in keyof T]-?: T[P]; // -? removes optionality
 };
 ```
 
@@ -80,14 +82,15 @@ interface Todo {
 }
 
 const todo: Readonly<Todo> = {
-  title: 'Learn TypeScript',
-  completed: false
+  title: "Learn TypeScript",
+  completed: false,
 };
 
-todo.completed = true;  // ❌ Error: readonly property
+todo.completed = true; // ❌ Error: readonly property
 ```
 
 **Implementation**:
+
 ```typescript
 type Readonly<T> = {
   readonly [P in keyof T]: T[P];
@@ -108,7 +111,7 @@ interface User {
   password: string;
 }
 
-type PublicUser = Pick<User, 'id' | 'name' | 'email'>;
+type PublicUser = Pick<User, "id" | "name" | "email">;
 // { id: number; name: string; email: string; }
 
 // Return safe user data
@@ -116,12 +119,13 @@ function getPublicUser(user: User): PublicUser {
   return {
     id: user.id,
     name: user.name,
-    email: user.email
+    email: user.email,
   };
 }
 ```
 
 **Implementation**:
+
 ```typescript
 type Pick<T, K extends keyof T> = {
   [P in K]: T[P];
@@ -142,14 +146,15 @@ interface User {
   password: string;
 }
 
-type UserWithoutPassword = Omit<User, 'password'>;
+type UserWithoutPassword = Omit<User, "password">;
 // { id: number; name: string; email: string; }
 
-type UserIdOnly = Omit<User, 'name' | 'email' | 'password'>;
+type UserIdOnly = Omit<User, "name" | "email" | "password">;
 // { id: number; }
 ```
 
 **Implementation**:
+
 ```typescript
 type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 ```
@@ -161,12 +166,12 @@ You need an object mapping user roles to permissions. TypeScript's `{ [key: stri
 Creates object type with keys K and values T.
 
 ```typescript
-type Role = 'admin' | 'user' | 'guest';
+type Role = "admin" | "user" | "guest";
 
 const permissions: Record<Role, string[]> = {
-  admin: ['read', 'write', 'delete'],
-  user: ['read', 'write'],
-  guest: ['read']
+  admin: ["read", "write", "delete"],
+  user: ["read", "write"],
+  guest: ["read"],
 };
 
 // Ensures all roles are defined
@@ -174,12 +179,14 @@ const permissions: Record<Role, string[]> = {
 ```
 
 **Common pattern**: Dictionary/map type
+
 ```typescript
 const userCache: Record<string, User> = {};
-userCache['123'] = { id: 123, name: 'Alice' };
+userCache["123"] = { id: 123, name: "Alice" };
 ```
 
 **Implementation**:
+
 ```typescript
 type Record<K extends keyof any, T> = {
   [P in K]: T;
@@ -193,18 +200,19 @@ Your API can return `'success' | 'error' | 'pending' | null`. But in a specific 
 Removes types from union.
 
 ```typescript
-type AllTypes = 'a' | 'b' | 'c' | 'd';
-type Excluded = Exclude<AllTypes, 'a' | 'c'>;
+type AllTypes = "a" | "b" | "c" | "d";
+type Excluded = Exclude<AllTypes, "a" | "c">;
 // 'b' | 'd'
 
 // Real-world: Remove null/undefined
 type NonNullable<T> = Exclude<T, null | undefined>;
 
 type Result = string | null | undefined;
-type SafeResult = NonNullable<Result>;  // string
+type SafeResult = NonNullable<Result>; // string
 ```
 
 **Implementation**:
+
 ```typescript
 type Exclude<T, U> = T extends U ? never : T;
 // Distributes over union
@@ -217,16 +225,17 @@ The opposite of Exclude - keep only the union members you want. Your type is `st
 Keeps only types assignable to U.
 
 ```typescript
-type AllTypes = 'a' | 'b' | 'c' | 'd';
-type Extracted = Extract<AllTypes, 'a' | 'c' | 'e'>;
+type AllTypes = "a" | "b" | "c" | "d";
+type Extracted = Extract<AllTypes, "a" | "c" | "e">;
 // 'a' | 'c'
 
 // Real-world: Extract specific types
 type Mixed = string | number | (() => void);
-type Functions = Extract<Mixed, Function>;  // () => void
+type Functions = Extract<Mixed, Function>; // () => void
 ```
 
 **Implementation**:
+
 ```typescript
 type Extract<T, U> = T extends U ? T : never;
 ```
@@ -239,7 +248,7 @@ Extracts function return type.
 
 ```typescript
 function getUser() {
-  return { id: 1, name: 'Alice' };
+  return { id: 1, name: "Alice" };
 }
 
 type User = ReturnType<typeof getUser>;
@@ -255,9 +264,13 @@ type Pair = ReturnType<typeof createPair<string>>;
 ```
 
 **Implementation**:
+
 ```typescript
-type ReturnType<T extends (...args: any) => any> =
-  T extends (...args: any) => infer R ? R : any;
+type ReturnType<T extends (...args: any) => any> = T extends (
+  ...args: any
+) => infer R
+  ? R
+  : any;
 ```
 
 ### Parameters<T>
@@ -276,15 +289,19 @@ type CreateUserParams = Parameters<typeof createUser>;
 
 // Use to match function signature
 function logAndCreate(...args: CreateUserParams) {
-  console.log('Creating user with:', args);
+  console.log("Creating user with:", args);
   return createUser(...args);
 }
 ```
 
 **Implementation**:
+
 ```typescript
-type Parameters<T extends (...args: any) => any> =
-  T extends (...args: infer P) => any ? P : never;
+type Parameters<T extends (...args: any) => any> = T extends (
+  ...args: infer P
+) => any
+  ? P
+  : never;
 ```
 
 ### Awaited<T>
@@ -295,15 +312,15 @@ Unwraps Promise type (TypeScript 4.5+).
 
 ```typescript
 type AsyncValue = Promise<string>;
-type Value = Awaited<AsyncValue>;  // string
+type Value = Awaited<AsyncValue>; // string
 
 // Nested Promises
 type Nested = Promise<Promise<number>>;
-type Unwrapped = Awaited<Nested>;  // number
+type Unwrapped = Awaited<Nested>; // number
 
 // Real-world: Infer async function return
 async function fetchUser() {
-  return { id: 1, name: 'Alice' };
+  return { id: 1, name: "Alice" };
 }
 
 type User = Awaited<ReturnType<typeof fetchUser>>;
@@ -405,8 +422,8 @@ Types that depend on conditions.
 ```typescript
 type IsString<T> = T extends string ? true : false;
 
-type A = IsString<string>;   // true
-type B = IsString<number>;   // false
+type A = IsString<string>; // true
+type B = IsString<number>; // false
 ```
 
 ### With Unions (Distributive)
@@ -428,8 +445,8 @@ Extract types from within other types.
 // Extract array element type
 type ElementType<T> = T extends (infer E)[] ? E : never;
 
-type Str = ElementType<string[]>;  // string
-type Num = ElementType<number[]>;  // number
+type Str = ElementType<string[]>; // string
+type Num = ElementType<number[]>; // number
 
 // Extract function return type (ReturnType implementation)
 type GetReturn<T> = T extends (...args: any[]) => infer R ? R : never;
@@ -437,17 +454,15 @@ type GetReturn<T> = T extends (...args: any[]) => infer R ? R : never;
 // Extract Promise value
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
-type A = UnwrapPromise<Promise<string>>;  // string
-type B = UnwrapPromise<number>;           // number
+type A = UnwrapPromise<Promise<string>>; // string
+type B = UnwrapPromise<number>; // number
 ```
 
 ### Advanced: DeepPartial
 
 ```typescript
 type DeepPartial<T> = {
-  [K in keyof T]?: T[K] extends object
-    ? DeepPartial<T[K]>
-    : T[K];
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
 };
 
 interface Nested {
@@ -483,11 +498,11 @@ String manipulation at type level (TypeScript 4.1+).
 ```typescript
 type Greeting = `Hello ${string}`;
 
-const g1: Greeting = 'Hello World';  // ✓
-const g2: Greeting = 'Hi World';     // ❌ Error
+const g1: Greeting = "Hello World"; // ✓
+const g2: Greeting = "Hi World"; // ❌ Error
 
 // With unions
-type Color = 'red' | 'blue' | 'green';
+type Color = "red" | "blue" | "green";
 type HexColor = `#${string}`;
 type ColorPalette = Color | HexColor;
 ```
@@ -508,8 +523,8 @@ type Title = Capitalize<'typescript'>;  // 'Typescript'
 ### API Route Builder
 
 ```typescript
-type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
-type Route = '/users' | '/posts' | '/comments';
+type HTTPMethod = "GET" | "POST" | "PUT" | "DELETE";
+type Route = "/users" | "/posts" | "/comments";
 type APIRoute = `${HTTPMethod} ${Route}`;
 
 // 'GET /users' | 'GET /posts' | ... | 'DELETE /comments' (12 combinations)
@@ -518,8 +533,8 @@ function handleRoute(route: APIRoute) {
   // Type-safe route handling
 }
 
-handleRoute('GET /users');      // ✓
-handleRoute('PATCH /users');    // ❌ Error
+handleRoute("GET /users"); // ✓
+handleRoute("PATCH /users"); // ❌ Error
 ```
 
 ### Event Names
@@ -527,7 +542,7 @@ handleRoute('PATCH /users');    // ❌ Error
 ```typescript
 type EventName<T extends string> = `on${Capitalize<T>}`;
 
-type Events = 'click' | 'focus' | 'blur';
+type Events = "click" | "focus" | "blur";
 type EventHandlers = EventName<Events>;
 // 'onClick' | 'onFocus' | 'onBlur'
 
@@ -632,12 +647,12 @@ class EventEmitter<T> {
 
 const emitter = new EventEmitter<Events>();
 
-emitter.on('click', (data) => {
-  console.log(data.x, data.y);  // Type-safe: { x, y }
+emitter.on("click", (data) => {
+  console.log(data.x, data.y); // Type-safe: { x, y }
 });
 
-emitter.emit('click', { x: 10, y: 20 });  // ✓
-emitter.emit('click', { x: 10 });         // ❌ Error: missing y
+emitter.emit("click", { x: 10, y: 20 }); // ✓
+emitter.emit("click", { x: 10 }); // ❌ Error: missing y
 ```
 
 </details>
@@ -661,12 +676,13 @@ interface User {
   email: string;
 }
 
-type A = Pick<User, 'id' | 'name'>;    // { id, name }
-type B = Omit<User, 'email'>;          // { id, name }
+type A = Pick<User, "id" | "name">; // { id, name }
+type B = Omit<User, "email">; // { id, name }
 // Same result, different approach
 ```
 
 **When to use**:
+
 - Pick: Few properties to include
 - Omit: Few properties to exclude
 
@@ -683,10 +699,9 @@ This separates developers who memorize syntax from those who understand the type
 
 ```typescript
 // Extract return type
-type ReturnType<T> =
-  T extends (...args: any[]) => infer R  // Declare R
-    ? R                                   // Use R
-    : never;
+type ReturnType<T> = T extends (...args: any[]) => infer R // Declare R
+  ? R // Use R
+  : never;
 
 // Extract array element
 type ElementType<T> = T extends (infer E)[] ? E : never;
@@ -730,9 +745,7 @@ This tests recursion understanding - can you write a type that calls itself? Als
 
 ```typescript
 type DeepPartial<T> = {
-  [K in keyof T]?: T[K] extends object
-    ? DeepPartial<T[K]>
-    : T[K];
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
 };
 
 // Better version (handles arrays):
@@ -756,6 +769,7 @@ type DeepPartial<T> = T extends object
 ## Next Steps
 
 In [Lesson 05: Generics Deep Dive](lesson-05-generics-deep-dive.md), you'll learn:
+
 - Generic constraints
 - Default type parameters
 - Variance in generics

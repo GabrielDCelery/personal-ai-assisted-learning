@@ -11,14 +11,14 @@ Understanding inference isn't just about writing less code - it's about knowing 
 ### Basic Inference
 
 ```typescript
-let x = 42;           // Type: number (inferred)
-let y = 'hello';      // Type: string
-let z = [1, 2, 3];    // Type: number[]
-let w = { a: 1 };     // Type: { a: number }
+let x = 42; // Type: number (inferred)
+let y = "hello"; // Type: string
+let z = [1, 2, 3]; // Type: number[]
+let w = { a: 1 }; // Type: { a: number }
 
 // Widening
-let a = null;         // Type: any (!)
-let b = undefined;    // Type: any (!)
+let a = null; // Type: any (!)
+let b = undefined; // Type: any (!)
 ```
 
 ### Best Common Type
@@ -26,14 +26,14 @@ let b = undefined;    // Type: any (!)
 When you have an array with different types, what should TypeScript infer? If you have `[new Dog(), new Cat()]`, both extend `Animal`, so you might expect `Animal[]`. But TypeScript doesn't assume parent types - it uses the union of what it sees: `(Dog | Cat)[]`. This is more precise but sometimes surprising. Understanding this helps you know when to explicitly type and when to let inference work.
 
 ```typescript
-let arr = [1, 2, 'three'];  // Type: (number | string)[]
+let arr = [1, 2, "three"]; // Type: (number | string)[]
 
-let mixed = [1, null];      // Type: (number | null)[]
+let mixed = [1, null]; // Type: (number | null)[]
 
 class Animal {}
 class Dog extends Animal {}
 class Cat extends Animal {}
-let animals = [new Dog(), new Cat()];  // Type: (Dog | Cat)[]
+let animals = [new Dog(), new Cat()]; // Type: (Dog | Cat)[]
 // Not Animal[] - TypeScript uses concrete types
 ```
 
@@ -43,18 +43,18 @@ Not all inference flows left-to-right from values. Sometimes TypeScript infers f
 
 ```typescript
 // Type inferred from context
-window.addEventListener('click', (e) => {
+window.addEventListener("click", (e) => {
   // e is inferred as MouseEvent
-  console.log(e.clientX);  // ✓ Knows about MouseEvent properties
+  console.log(e.clientX); // ✓ Knows about MouseEvent properties
 });
 
 // Array methods
 const numbers = [1, 2, 3];
-numbers.map(n => n.toFixed(2));  // n is inferred as number
+numbers.map((n) => n.toFixed(2)); // n is inferred as number
 
 // Return type inferred
 function double(x: number) {
-  return x * 2;  // Return type: number (inferred)
+  return x * 2; // Return type: number (inferred)
 }
 ```
 
@@ -66,21 +66,21 @@ This is usually helpful, but sometimes you WANT the literal type - like when def
 
 ```typescript
 // Widening
-let x = 'hello';      // Type: string (not "hello")
-let y = 42;           // Type: number (not 42)
-let z = true;         // Type: boolean (not true)
+let x = "hello"; // Type: string (not "hello")
+let y = 42; // Type: number (not 42)
+let z = true; // Type: boolean (not true)
 
 // Prevent widening with const
-const a = 'hello';    // Type: "hello" (literal)
-const b = 42;         // Type: 42 (literal)
+const a = "hello"; // Type: "hello" (literal)
+const b = 42; // Type: 42 (literal)
 
 // Object widening
-let obj = { x: 1 };   // Type: { x: number }
+let obj = { x: 1 }; // Type: { x: number }
 const obj2 = { x: 1 }; // Still: { x: number }
 // Note: const doesn't prevent widening for objects!
 
 // Prevent with as const
-const obj3 = { x: 1 } as const;  // Type: { readonly x: 1 }
+const obj3 = { x: 1 } as const; // Type: { readonly x: 1 }
 ```
 
 ### Interview Question: const vs as const
@@ -89,20 +89,20 @@ Here's a common gotcha: `const obj = { x: 1 }` doesn't give you literal types fo
 
 ```typescript
 const config = {
-  apiUrl: 'https://api.example.com',
-  timeout: 5000
+  apiUrl: "https://api.example.com",
+  timeout: 5000,
 };
 // Type: { apiUrl: string; timeout: number }
 
 const config2 = {
-  apiUrl: 'https://api.example.com',
-  timeout: 5000
+  apiUrl: "https://api.example.com",
+  timeout: 5000,
 } as const;
 // Type: { readonly apiUrl: "https://api.example.com"; readonly timeout: 5000 }
 
 // Usage difference:
-config.timeout = 10000;   // ✓ Allowed
-config2.timeout = 10000;  // ❌ Error: readonly
+config.timeout = 10000; // ✓ Allowed
+config2.timeout = 10000; // ❌ Error: readonly
 ```
 
 ## Type Narrowing
@@ -115,10 +115,10 @@ Narrowing is how you work with union types safely. Without it, every union would
 
 ```typescript
 function process(value: string | number) {
-  if (typeof value === 'string') {
-    return value.toUpperCase();  // Type: string
+  if (typeof value === "string") {
+    return value.toUpperCase(); // Type: string
   } else {
-    return value.toFixed(2);     // Type: number
+    return value.toFixed(2); // Type: number
   }
 }
 ```
@@ -135,9 +135,9 @@ class Cat {
 
 function speak(animal: Dog | Cat) {
   if (animal instanceof Dog) {
-    animal.bark();  // Type: Dog
+    animal.bark(); // Type: Dog
   } else {
-    animal.meow();  // Type: Cat
+    animal.meow(); // Type: Cat
   }
 }
 ```
@@ -153,10 +153,10 @@ interface Bird {
 }
 
 function move(animal: Fish | Bird) {
-  if ('swim' in animal) {
-    animal.swim();  // Type: Fish
+  if ("swim" in animal) {
+    animal.swim(); // Type: Fish
   } else {
-    animal.fly();   // Type: Bird
+    animal.fly(); // Type: Bird
   }
 }
 ```
@@ -167,20 +167,20 @@ The gold standard for type-safe unions. Add a literal `kind` or `type` field tha
 
 ```typescript
 interface Success {
-  kind: 'success';
+  kind: "success";
   data: string;
 }
 interface Error {
-  kind: 'error';
+  kind: "error";
   message: string;
 }
 type Result = Success | Error;
 
 function handle(result: Result) {
-  if (result.kind === 'success') {
-    console.log(result.data);  // Type: Success
+  if (result.kind === "success") {
+    console.log(result.data); // Type: Success
   } else {
-    console.log(result.message);  // Type: Error
+    console.log(result.message); // Type: Error
   }
 }
 ```
@@ -192,16 +192,16 @@ Using `if (str)` to check for `string | null` works, but has a gotcha: empty str
 ```typescript
 function printLength(str: string | null) {
   if (str) {
-    console.log(str.length);  // Type: string
+    console.log(str.length); // Type: string
   } else {
-    console.log('No string');  // Type: null
+    console.log("No string"); // Type: null
   }
 }
 
 // Caveat: Excludes falsy values
 function printLength2(str: string | null) {
   if (str) {
-    console.log(str.length);  // Type: string
+    console.log(str.length); // Type: string
   }
   // But empty string '' is also falsy!
 }
@@ -209,7 +209,7 @@ function printLength2(str: string | null) {
 // Better:
 function printLength3(str: string | null) {
   if (str !== null) {
-    console.log(str.length);  // Type: string (includes '')
+    console.log(str.length); // Type: string (includes '')
   }
 }
 ```
@@ -227,16 +227,16 @@ interface User {
 // Type predicate
 function isUser(obj: any): obj is User {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    typeof obj.name === 'string' &&
-    typeof obj.email === 'string'
+    typeof obj.name === "string" &&
+    typeof obj.email === "string"
   );
 }
 
 function greet(data: unknown) {
   if (isUser(data)) {
-    console.log(data.name);  // Type: User
+    console.log(data.name); // Type: User
   }
 }
 ```
@@ -253,8 +253,8 @@ function assert(condition: any, msg?: string): asserts condition {
 }
 
 function assertIsString(val: any): asserts val is string {
-  if (typeof val !== 'string') {
-    throw new Error('Not a string');
+  if (typeof val !== "string") {
+    throw new Error("Not a string");
   }
 }
 
@@ -286,7 +286,7 @@ interface Vector {
 }
 
 const point: Point2D = { x: 0, y: 0 };
-const vec: Vector = point;  // ✓ Compatible (same structure)
+const vec: Vector = point; // ✓ Compatible (same structure)
 
 // Nominal typing (e.g., Java, C#):
 // Point2D and Vector would be incompatible despite same shape
@@ -306,23 +306,23 @@ interface Config {
 
 // ✓ Allowed (structural)
 const config1: Config = {
-  url: 'https://api.com',
+  url: "https://api.com",
   timeout: 5000,
-  retries: 3  // ❌ Error: Object literal may only specify known properties
+  retries: 3, // ❌ Error: Object literal may only specify known properties
 };
 
 // ✓ Workaround: Assign to variable first
 const temp = {
-  url: 'https://api.com',
+  url: "https://api.com",
   timeout: 5000,
-  retries: 3
+  retries: 3,
 };
-const config2: Config = temp;  // ✓ No error (excess property check bypassed)
+const config2: Config = temp; // ✓ No error (excess property check bypassed)
 
 // ✓ Type assertion
 const config3: Config = {
-  url: 'https://api.com',
-  retries: 3
+  url: "https://api.com",
+  retries: 3,
 } as Config;
 ```
 
@@ -339,12 +339,12 @@ interface Dog extends Animal {
   breed: string;
 }
 
-const dog: Dog = { name: 'Buddy', breed: 'Golden' };
-const animal: Animal = dog;  // ✓ Dog is subtype of Animal (more properties OK)
+const dog: Dog = { name: "Buddy", breed: "Golden" };
+const animal: Animal = dog; // ✓ Dog is subtype of Animal (more properties OK)
 
 // Reverse doesn't work:
-const animal2: Animal = { name: 'Unknown' };
-const dog2: Dog = animal2;  // ❌ Error: missing 'breed'
+const animal2: Animal = { name: "Unknown" };
+const dog2: Dog = animal2; // ❌ Error: missing 'breed'
 ```
 
 ## Variance
@@ -369,12 +369,12 @@ interface Dog extends Animal {
 
 // Arrays are covariant in read position
 let animals: Animal[] = [];
-let dogs: Dog[] = [{ name: 'Buddy', breed: 'Golden' }];
+let dogs: Dog[] = [{ name: "Buddy", breed: "Golden" }];
 
-animals = dogs;  // ✓ Dog[] is subtype of Animal[]
+animals = dogs; // ✓ Dog[] is subtype of Animal[]
 
 // Reading is safe:
-const animal: Animal = animals[0];  // ✓ Dog is Animal
+const animal: Animal = animals[0]; // ✓ Dog is Animal
 
 // But writing is unsafe (in reality):
 // animals.push({ name: 'Cat' });  // Would break dogs array!
@@ -399,11 +399,11 @@ let dogFunc: Func<Dog> = (dog) => {
 };
 
 // Contravariance: Can assign Animal handler to Dog position
-dogFunc = animalFunc;  // ✓ With strictFunctionTypes: true
+dogFunc = animalFunc; // ✓ With strictFunctionTypes: true
 
 // Why? Every Dog is an Animal, so Animal handler can handle Dogs
 // Reverse is unsafe:
-animalFunc = dogFunc;  // ❌ Error: Cat doesn't have 'breed'
+animalFunc = dogFunc; // ❌ Error: Cat doesn't have 'breed'
 ```
 
 ### Invariance (Read-Write)
@@ -420,8 +420,8 @@ interface Box<T> {
 let animalBox: Box<Animal>;
 let dogBox: Box<Dog>;
 
-animalBox = dogBox;  // ❌ Error: Invariant
-dogBox = animalBox;  // ❌ Error: Invariant
+animalBox = dogBox; // ❌ Error: Invariant
+dogBox = animalBox; // ❌ Error: Invariant
 
 // Why? Both read and write:
 // If allowed: animalBox.set({ name: 'Cat' }) would corrupt dogBox
@@ -437,8 +437,8 @@ let animalHandler: Handler<Animal>;
 let dogHandler: Handler<Dog>;
 
 // Both allowed (bivariant - unsafe!)
-animalHandler = dogHandler;  // ⚠️ Allowed
-dogHandler = animalHandler;  // ⚠️ Allowed
+animalHandler = dogHandler; // ⚠️ Allowed
+dogHandler = animalHandler; // ⚠️ Allowed
 
 // Always use strictFunctionTypes: true
 ```
@@ -455,11 +455,11 @@ let f1: Func1 = (a, b) => a + b;
 let f2: Func2 = (a) => a * 2;
 
 // Can assign fewer parameters
-f1 = f2;  // ✓ Allowed (extra params ignored)
-f2 = f1;  // ❌ Error (missing required param)
+f1 = f2; // ✓ Allowed (extra params ignored)
+f2 = f1; // ❌ Error (missing required param)
 
 // Array.forEach example:
-[1, 2, 3].forEach((n) => console.log(n));  // ✓ Ignores index, array params
+[1, 2, 3].forEach((n) => console.log(n)); // ✓ Ignores index, array params
 ```
 
 ### Return Type Compatibility
@@ -472,8 +472,8 @@ let getAnimal: GetAnimal;
 let getDog: GetDog;
 
 // Return type is covariant
-getAnimal = getDog;  // ✓ Returning Dog is safe (Dog is Animal)
-getDog = getAnimal;  // ❌ Error: Returning Animal might not be Dog
+getAnimal = getDog; // ✓ Returning Dog is safe (Dog is Animal)
+getDog = getAnimal; // ❌ Error: Returning Animal might not be Dog
 ```
 
 ## Hands-On Exercise 1: Narrowing Challenge
@@ -496,7 +496,7 @@ function process(value: string | number | null) {
     return;
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     console.log(value.toUpperCase());
   } else {
     console.log(value.toFixed(2));
@@ -512,11 +512,11 @@ Write a type guard for this shape:
 
 ```typescript
 interface ApiSuccess {
-  status: 'success';
+  status: "success";
   data: any;
 }
 interface ApiError {
-  status: 'error';
+  status: "error";
   error: string;
 }
 type ApiResponse = ApiSuccess | ApiError;
@@ -529,15 +529,15 @@ type ApiResponse = ApiSuccess | ApiError;
 
 ```typescript
 function isSuccess(response: ApiResponse): response is ApiSuccess {
-  return response.status === 'success';
+  return response.status === "success";
 }
 
 // Usage:
 function handle(response: ApiResponse) {
   if (isSuccess(response)) {
-    console.log(response.data);  // Type: ApiSuccess
+    console.log(response.data); // Type: ApiSuccess
   } else {
-    console.log(response.error);  // Type: ApiError
+    console.log(response.error); // Type: ApiError
   }
 }
 ```
@@ -549,8 +549,12 @@ function handle(response: ApiResponse) {
 Explain why this works or doesn't:
 
 ```typescript
-interface Animal { name: string; }
-interface Dog extends Animal { breed: string; }
+interface Animal {
+  name: string;
+}
+interface Dog extends Animal {
+  breed: string;
+}
 
 type AnimalFunc = (animal: Animal) => void;
 type DogFunc = (dog: Dog) => void;
@@ -559,18 +563,18 @@ let f1: AnimalFunc = (a) => console.log(a.name);
 let f2: DogFunc = (d) => console.log(d.breed);
 
 // Will these work? Why?
-f1 = f2;  // ?
-f2 = f1;  // ?
+f1 = f2; // ?
+f2 = f1; // ?
 ```
 
 <details>
 <summary>Solution</summary>
 
 ```typescript
-f1 = f2;  // ❌ Error
+f1 = f2; // ❌ Error
 // AnimalFunc might receive Cat, but f2 expects Dog (needs .breed)
 
-f2 = f1;  // ✓ Allowed (contravariance)
+f2 = f1; // ✓ Allowed (contravariance)
 // DogFunc only receives Dogs, and f1 can handle any Animal
 // Since Dog extends Animal, f1 is safe to use
 
@@ -591,15 +595,15 @@ This tests whether you understand TypeScript's inference rules versus just "type
 TypeScript converts literal types to general types for mutability.
 
 ```typescript
-let x = 'hello';  // Type: string (widened from "hello")
-const y = 'hello';  // Type: "hello" (literal)
+let x = "hello"; // Type: string (widened from "hello")
+const y = "hello"; // Type: "hello" (literal)
 
 // Reason: let can be reassigned
-x = 'world';  // Must allow any string
+x = "world"; // Must allow any string
 
 // Prevent with as const:
-let z = 'hello' as const;  // Type: "hello"
-z = 'world';  // ❌ Error
+let z = "hello" as const; // Type: "hello"
+z = "world"; // ❌ Error
 ```
 
 </details>
@@ -614,11 +618,15 @@ Fundamental to understanding TypeScript's type system. Coming from nominal langu
 **Structural** (TypeScript): Compatibility based on shape/structure.
 
 ```typescript
-interface A { x: number; }
-interface B { x: number; }
+interface A {
+  x: number;
+}
+interface B {
+  x: number;
+}
 
 const a: A = { x: 1 };
-const b: B = a;  // ✓ Same structure
+const b: B = a; // ✓ Same structure
 ```
 
 **Nominal** (Java, C#, Flow): Compatibility based on explicit declarations.
@@ -646,14 +654,14 @@ Use a common literal property to discriminate union members.
 
 ```typescript
 type Shape =
-  | { kind: 'circle'; radius: number }
-  | { kind: 'square'; size: number };
+  | { kind: "circle"; radius: number }
+  | { kind: "square"; size: number };
 
 function area(shape: Shape) {
-  if (shape.kind === 'circle') {
-    return Math.PI * shape.radius ** 2;  // Type: circle
+  if (shape.kind === "circle") {
+    return Math.PI * shape.radius ** 2; // Type: circle
   } else {
-    return shape.size ** 2;  // Type: square
+    return shape.size ** 2; // Type: square
   }
 }
 ```
@@ -673,11 +681,11 @@ These are both custom narrowing techniques but with different control flow. Know
 
 ```typescript
 function isString(val: any): val is string {
-  return typeof val === 'string';
+  return typeof val === "string";
 }
 
 if (isString(x)) {
-  x.toUpperCase();  // Type: string
+  x.toUpperCase(); // Type: string
 }
 ```
 
@@ -685,11 +693,11 @@ if (isString(x)) {
 
 ```typescript
 function assertString(val: any): asserts val is string {
-  if (typeof val !== 'string') throw new Error();
+  if (typeof val !== "string") throw new Error();
 }
 
 assertString(x);
-x.toUpperCase();  // Type: string (if we reach here)
+x.toUpperCase(); // Type: string (if we reach here)
 ```
 
 </details>
@@ -709,17 +717,19 @@ type Handler<T> = (arg: T) => void;
 let animalHandler: Handler<Animal> = (a) => console.log(a.name);
 let dogHandler: Handler<Dog>;
 
-dogHandler = animalHandler;  // ✓ Contravariance
+dogHandler = animalHandler; // ✓ Contravariance
 ```
 
 **Why safe?**
+
 - `dogHandler` receives only Dogs
 - `animalHandler` can handle any Animal
 - Dog is an Animal, so it works
 
 **Why reverse is unsafe?**
+
 ```typescript
-animalHandler = dogHandler;  // ❌ With strictFunctionTypes
+animalHandler = dogHandler; // ❌ With strictFunctionTypes
 // animalHandler might receive Cat, but dogHandler expects Dog
 ```
 
@@ -741,6 +751,7 @@ animalHandler = dogHandler;  // ❌ With strictFunctionTypes
 ## Next Steps
 
 In [Lesson 04: Utility Types & Type Manipulation](lesson-04-utility-types-and-manipulation.md), you'll learn:
+
 - Built-in utility types (Partial, Pick, Record, etc.)
 - Mapped types
 - Conditional types

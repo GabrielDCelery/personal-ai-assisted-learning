@@ -18,21 +18,24 @@ exports.subtract = (a, b) => a - b;
 // Or
 module.exports = {
   add: (a, b) => a + b,
-  subtract: (a, b) => a - b
+  subtract: (a, b) => a - b,
 };
 
 // Or default export
 module.exports = class Calculator {
-  add(a, b) { return a + b; }
+  add(a, b) {
+    return a + b;
+  }
 };
 
 // app.js - Importing
-const math = require('./math');
-const { add } = require('./math');
-const Calculator = require('./calculator');
+const math = require("./math");
+const { add } = require("./math");
+const Calculator = require("./calculator");
 ```
 
 **Characteristics**:
+
 - Synchronous loading
 - Dynamic (can `require()` conditionally)
 - Runtime resolution
@@ -53,16 +56,19 @@ export { add, subtract };
 
 // Default export
 export default class Calculator {
-  add(a: number, b: number) { return a + b; }
+  add(a: number, b: number) {
+    return a + b;
+  }
 }
 
 // app.ts - Importing
-import * as math from './math.js';  // Note: .js extension!
-import { add } from './math.js';
-import Calculator from './calculator.js';
+import * as math from "./math.js"; // Note: .js extension!
+import { add } from "./math.js";
+import Calculator from "./calculator.js";
 ```
 
 **Characteristics**:
+
 - Static analysis possible
 - Async loading
 - Compile-time resolution
@@ -73,16 +79,16 @@ import Calculator from './calculator.js';
 
 When you see "tree-shaking doesn't work" or "bundle size is huge," module format is often the culprit. When top-level await fails, you're probably in CommonJS. This table is the cheat sheet for "why isn't this working?"
 
-| Feature | CommonJS | ESM |
-|---------|----------|-----|
-| Syntax | `require()` / `module.exports` | `import` / `export` |
-| Loading | Synchronous | Async |
-| When resolved | Runtime | Parse time |
-| Tree-shaking | ❌ No | ✓ Yes |
-| Dynamic imports | Always | Via `import()` |
-| Top-level await | ❌ No | ✓ Yes (Node 14.8+) |
-| File extension | Optional | Required (Node16+) |
-| `this` | `exports` | `undefined` |
+| Feature         | CommonJS                       | ESM                 |
+| --------------- | ------------------------------ | ------------------- |
+| Syntax          | `require()` / `module.exports` | `import` / `export` |
+| Loading         | Synchronous                    | Async               |
+| When resolved   | Runtime                        | Parse time          |
+| Tree-shaking    | ❌ No                          | ✓ Yes               |
+| Dynamic imports | Always                         | Via `import()`      |
+| Top-level await | ❌ No                          | ✓ Yes (Node 14.8+)  |
+| File extension  | Optional                       | Required (Node16+)  |
+| `this`          | `exports`                      | `undefined`         |
 
 ## TypeScript Compilation
 
@@ -96,14 +102,14 @@ The `module` compiler option determines what JavaScript your TypeScript becomes.
 // tsconfig.json
 {
   "compilerOptions": {
-    "module": "CommonJS"  // or "ES2020", "ESNext", "NodeNext"
+    "module": "CommonJS" // or "ES2020", "ESNext", "NodeNext"
   }
 }
 ```
 
 ```typescript
 // Source (TypeScript)
-import { foo } from './bar';
+import { foo } from "./bar";
 export const baz = 42;
 
 // Output with "module": "CommonJS"
@@ -111,7 +117,7 @@ const bar_1 = require("./bar");
 exports.baz = 42;
 
 // Output with "module": "ES2020"
-import { foo } from './bar';
+import { foo } from "./bar";
 export const baz = 42;
 ```
 
@@ -129,14 +135,16 @@ The "why can't I import express normally?" problem. CommonJS modules export with
 ```
 
 **Without esModuleInterop**:
+
 ```typescript
-import * as express from 'express';  // Must use namespace import
+import * as express from "express"; // Must use namespace import
 const app = express();
 ```
 
 **With esModuleInterop**:
+
 ```typescript
-import express from 'express';  // Can use default import
+import express from "express"; // Can use default import
 const app = express();
 ```
 
@@ -156,11 +164,11 @@ Different runtimes have different rules. Webpack doesn't require extensions. Mod
 }
 ```
 
-| Strategy | Use Case | Behavior |
-|----------|----------|----------|
-| `node` | Legacy Node | Classic Node resolution |
+| Strategy              | Use Case          | Behavior                                             |
+| --------------------- | ----------------- | ---------------------------------------------------- |
+| `node`                | Legacy Node       | Classic Node resolution                              |
 | `node16` / `nodenext` | Modern Node (16+) | Respects package.json `exports`, requires extensions |
-| `bundler` | Webpack/Vite | Like node16 but relaxed (no extensions needed) |
+| `bundler`             | Webpack/Vite      | Like node16 but relaxed (no extensions needed)       |
 
 ### Classic Resolution (node)
 
@@ -201,7 +209,7 @@ import { foo } from 'my-lib';    // Uses "exports" field
 export const helper = () => {};
 
 // file: src/app.ts
-import { helper } from './utils.js';  // ✓ Correct
+import { helper } from "./utils.js"; // ✓ Correct
 // TypeScript finds utils.ts, emits utils.js
 ```
 
@@ -224,9 +232,9 @@ Library authors want control over their public API. The `exports` field in packa
 ```
 
 ```typescript
-import lib from 'my-lib';          // Uses exports["."]
-import { util } from 'my-lib/utils';  // Uses exports["./utils"]
-import { foo } from 'my-lib/internal';  // ❌ Not in exports
+import lib from "my-lib"; // Uses exports["."]
+import { util } from "my-lib/utils"; // Uses exports["./utils"]
+import { foo } from "my-lib/internal"; // ❌ Not in exports
 ```
 
 ## Import/Export Patterns
@@ -252,8 +260,8 @@ function add(a: number, b: number) {
 export { PI, add };
 
 // Re-export
-export { foo, bar } from './other';
-export * from './other';  // Re-export all
+export { foo, bar } from "./other";
+export * from "./other"; // Re-export all
 ```
 
 ### Default Export
@@ -273,7 +281,7 @@ class Calculator {
 export default Calculator;
 
 // Or inline value
-export default { version: '1.0.0' };
+export default { version: "1.0.0" };
 ```
 
 ### Import Patterns
@@ -282,23 +290,23 @@ The consumer side of exports. Destructuring (`{ foo, bar }`) is common for named
 
 ```typescript
 // Named imports
-import { foo, bar } from './module';
+import { foo, bar } from "./module";
 
 // Aliasing
-import { foo as f, bar as b } from './module';
+import { foo as f, bar as b } from "./module";
 
 // Namespace import
-import * as utils from './utils';
+import * as utils from "./utils";
 utils.foo();
 
 // Default import
-import Calculator from './calculator';
+import Calculator from "./calculator";
 
 // Mixed
-import Calculator, { add, subtract } from './math';
+import Calculator, { add, subtract } from "./math";
 
 // Side-effects only
-import './polyfills';
+import "./polyfills";
 ```
 
 ### Re-exporting
@@ -307,16 +315,16 @@ Building a public API from multiple internal modules. You have `./internal/auth.
 
 ```typescript
 // Re-export named
-export { foo, bar } from './other';
+export { foo, bar } from "./other";
 
 // Re-export all
-export * from './other';
+export * from "./other";
 
 // Re-export with rename
-export { foo as newFoo } from './other';
+export { foo as newFoo } from "./other";
 
 // Re-export default as named
-export { default as Calculator } from './calculator';
+export { default as Calculator } from "./calculator";
 ```
 
 ## Dynamic Imports
@@ -325,24 +333,24 @@ Static imports load everything upfront, bloating your initial bundle. Dynamic im
 
 ```typescript
 // Static import - always loaded
-import { large } from './large-module';
+import { large } from "./large-module";
 
 // Dynamic import - loaded on demand
 async function loadFeature() {
-  const { large } = await import('./large-module');
+  const { large } = await import("./large-module");
   large();
 }
 
 // Conditional loading
 if (condition) {
-  const module = await import('./conditional');
+  const module = await import("./conditional");
 }
 
 // Type-safe dynamic import
-type MathModule = typeof import('./math');
+type MathModule = typeof import("./math");
 
 async function getMath(): Promise<MathModule> {
-  return import('./math');
+  return import("./math");
 }
 ```
 
@@ -364,7 +372,7 @@ async function loadRoute(route: string) {
 
 // Feature flags
 if (featureFlags.newFeature) {
-  const { NewFeature } = await import('./new-feature');
+  const { NewFeature } = await import("./new-feature");
   // Use NewFeature
 }
 ```
@@ -377,10 +385,10 @@ Only works in ESM (Node 14.8+, "module": "ES2022"+).
 
 ```typescript
 // ❌ CommonJS
-const data = await fetch('/api/data');  // Error: await in top-level
+const data = await fetch("/api/data"); // Error: await in top-level
 
 // ✓ ESM (package.json: { "type": "module" })
-const response = await fetch('/api/data');
+const response = await fetch("/api/data");
 const data = await response.json();
 
 export const config = data;
@@ -396,15 +404,16 @@ For importing non-JavaScript files (Node 17+).
 
 ```typescript
 // JSON
-import data from './data.json' assert { type: 'json' };
+import data from "./data.json" assert { type: "json" };
 
 // CSS (in bundlers)
-import styles from './styles.css' assert { type: 'css' };
+import styles from "./styles.css" assert { type: "css" };
 ```
 
 **New syntax (TypeScript 5.3+)**:
+
 ```typescript
-import data from './data.json' with { type: 'json' };
+import data from "./data.json" with { type: "json" };
 ```
 
 ## CommonJS Interop
@@ -419,8 +428,8 @@ CommonJS modules export a single object (`module.exports`). ESM expects either n
 // CommonJS module: const foo = { bar: 42 }; module.exports = foo;
 
 // ESM import
-import foo from './cjs-module';  // ✓ Works with esModuleInterop
-import * as foo from './cjs-module';  // ✓ Always works
+import foo from "./cjs-module"; // ✓ Works with esModuleInterop
+import * as foo from "./cjs-module"; // ✓ Always works
 
 console.log(foo.bar);
 ```
@@ -431,11 +440,11 @@ The hard limitation: CommonJS is synchronous, ESM is asynchronous. You cannot us
 
 ```javascript
 // ❌ Can't use static import in CommonJS
-import { foo } from './esm-module';  // Error
+import { foo } from "./esm-module"; // Error
 
 // ✓ Use dynamic import
 async function load() {
-  const { foo } = await import('./esm-module.mjs');
+  const { foo } = await import("./esm-module.mjs");
   console.log(foo);
 }
 ```
@@ -455,15 +464,15 @@ declare namespace Express {
 }
 
 // Your code: extend Express.Request
-declare module 'express' {
+declare module "express" {
   interface Request {
     customProp: string;
   }
 }
 
 // Now available:
-app.get('/', (req, res) => {
-  console.log(req.customProp);  // ✓ TypeScript knows about it
+app.get("/", (req, res) => {
+  console.log(req.customProp); // ✓ TypeScript knows about it
 });
 ```
 
@@ -495,7 +504,7 @@ exports.add = add;
 exports.subtract = subtract;
 
 // app.js
-const { add } = require('./math');
+const { add } = require("./math");
 console.log(add(1, 2));
 ```
 
@@ -556,11 +565,11 @@ export interface Analytics {
 export function createAnalytics(): Analytics {
   return {
     track(event: string) {
-      console.log('Track:', event);
+      console.log("Track:", event);
     },
     pageView(url: string) {
-      console.log('Page view:', url);
-    }
+      console.log("Page view:", url);
+    },
   };
 }
 
@@ -570,13 +579,13 @@ async function initAnalytics(enabled: boolean): Promise<Analytics | null> {
     return null;
   }
 
-  const { createAnalytics } = await import('./analytics.js');
+  const { createAnalytics } = await import("./analytics.js");
   return createAnalytics();
 }
 
 // Usage
 const analytics = await initAnalytics(true);
-analytics?.track('app_start');
+analytics?.track("app_start");
 ```
 
 </details>
@@ -590,16 +599,17 @@ This question reveals whether you understand the fundamental tradeoffs in module
 <details>
 <summary>Answer</summary>
 
-| Aspect | CommonJS | ESM |
-|--------|----------|-----|
-| **When evaluated** | Runtime | Parse time |
-| **Loading** | Synchronous | Async |
-| **Tree-shaking** | No | Yes |
-| **Dynamic imports** | Built-in | Via `import()` |
-| **Extensions** | Optional | Required (Node16+) |
-| **Top-level await** | No | Yes |
+| Aspect              | CommonJS    | ESM                |
+| ------------------- | ----------- | ------------------ |
+| **When evaluated**  | Runtime     | Parse time         |
+| **Loading**         | Synchronous | Async              |
+| **Tree-shaking**    | No          | Yes                |
+| **Dynamic imports** | Built-in    | Via `import()`     |
+| **Extensions**      | Optional    | Required (Node16+) |
+| **Top-level await** | No          | Yes                |
 
 **Why ESM?**
+
 - Better for bundlers (tree-shaking)
 - Standard across environments
 - Static analysis enables optimization
@@ -614,17 +624,17 @@ Tests understanding of TypeScript's compilation model and the gap between source
 <summary>Answer</summary>
 
 ```typescript
-import { foo } from './bar.js';  // Why .js for .ts file?
+import { foo } from "./bar.js"; // Why .js for .ts file?
 ```
 
-**Reason**: TypeScript emits code that Node will run. Node resolves imports in the *emitted* .js files.
+**Reason**: TypeScript emits code that Node will run. Node resolves imports in the _emitted_ .js files.
 
 ```typescript
 // Source: src/app.ts
-import { foo } from './utils.js';
+import { foo } from "./utils.js";
 
 // Emitted: dist/app.js
-import { foo } from './utils.js';  // Node looks for utils.js
+import { foo } from "./utils.js"; // Node looks for utils.js
 ```
 
 TypeScript finds the source (.ts) but emits the extension you specified (.js).
@@ -644,12 +654,12 @@ Enables default imports from CommonJS modules.
 // CommonJS module: module.exports = function() {}
 
 // Without esModuleInterop
-import * as express from 'express';
-const app = express();  // ❌ Error: not callable
+import * as express from "express";
+const app = express(); // ❌ Error: not callable
 
 // With esModuleInterop: true
-import express from 'express';
-const app = express();  // ✓ Works
+import express from "express";
+const app = express(); // ✓ Works
 ```
 
 **What it does**: Adds runtime helpers to make CJS default exports compatible with ESM default imports.
@@ -664,22 +674,26 @@ Reveals performance awareness and understanding of code splitting. Strong answer
 <summary>Answer</summary>
 
 **Use cases**:
+
 1. **Code splitting**: Reduce initial bundle
+
    ```typescript
-   const module = await import('./large-feature');
+   const module = await import("./large-feature");
    ```
 
 2. **Conditional loading**: Feature flags
+
    ```typescript
    if (featureEnabled) {
-     await import('./new-feature');
+     await import("./new-feature");
    }
    ```
 
 3. **Lazy loading**: On-demand
+
    ```typescript
    button.onclick = async () => {
-     const { modal } = await import('./modal');
+     const { modal } = await import("./modal");
      modal.show();
    };
    ```
@@ -702,7 +716,7 @@ Extend existing module types:
 
 ```typescript
 // Extend external module
-declare module 'express' {
+declare module "express" {
   interface Request {
     userId?: string;
   }
@@ -710,11 +724,12 @@ declare module 'express' {
 
 // Now available:
 app.use((req, res, next) => {
-  req.userId = '123';  // ✓ TypeScript knows
+  req.userId = "123"; // ✓ TypeScript knows
 });
 ```
 
 **Requirements**:
+
 - Must use `declare module 'exact-module-name'`
 - File must be a module (has import/export)
 - Works with interface merging
@@ -734,6 +749,7 @@ app.use((req, res, next) => {
 ## Next Steps
 
 In [Lesson 07: Declaration Files](lesson-07-declaration-files.md), you'll learn:
+
 - Writing .d.ts files
 - Ambient declarations
 - Triple-slash directives

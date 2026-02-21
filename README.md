@@ -8,6 +8,10 @@ Kind a like having a personal tutor.
 
 # Lesson series
 
-- `channels` - wanted to get a better understanding of go channels
-- `docker` - learn docker starting from the basics
-- `kubernetes` - learn kubernetes starting from the basics
+- `go`
+  - `channels` - wanted to get a better understanding of go channels
+  - `primitives` - some clarification arund values and pointers
+- `typescript` - proper refresher (worth doing every once in a while)
+- `docker` - experimental (was curius how it fares against some of the courses that I used in the past)
+- `kubernetes` - learn kubernetes starting from the basics (no work kubernetes experience and I actually wanted to learn more about it)
+- `aws` - wanted to use this to expand my horizon but needs more work

@@ -104,6 +104,9 @@ TypeScript will:
 - Allow ES2015 APIs (Promise, Map, etc.) in your code
 - Assume polyfills exist at runtime
 
+> [!WARN]
+> lib does not install anything, just tells the transpiler that certain language specific APIs (e.g. Promise.resolve) will be available at runtime but they need to be provided separately
+
 ## Module Resolution
 
 ### Resolution Strategies

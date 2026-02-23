@@ -1,91 +1,44 @@
-# Docker Learning Journey
+# Docker Advanced Interview Prep
 
-Welcome to your Docker learning series! This curriculum will take you from Docker basics to advanced concepts through hands-on lessons.
+A focused, senior-level refresher for developers with 2+ years of Docker experience preparing for technical interviews.
 
-## Curriculum Overview
+## Lesson Series
 
-### Foundations
+### Image Internals & Building
+- [Lesson 01: Image Internals & Optimization](lesson-01-image-internals-and-optimization.md) - OverlayFS, layer caching, multi-stage builds, distroless, BuildKit
+- [Lesson 07: BuildKit & Multi-platform Builds](lesson-07-buildkit-and-multi-platform.md) - RUN --mount, build secrets, buildx, QEMU, multi-platform, cache backends
 
-- **Lesson 01**: Docker Fundamentals - What is Docker and why use it?
-- **Lesson 02**: Images vs Containers - Understanding the core concepts
-- **Lesson 03**: Running Your First Container - Basic container operations
-- **Lesson 04**: Docker CLI Essentials - Common commands and workflows
+### Networking
+- [Lesson 02: Networking Deep Dive](lesson-02-networking-deep-dive.md) - Network namespaces, bridge/overlay/host/macvlan, DNS, inter-container communication
 
-### Building Images
+### Storage
+- [Lesson 03: Volumes & Storage Strategies](lesson-03-volumes-and-storage-strategies.md) - Named volumes vs bind mounts vs tmpfs, volume drivers, backup/restore
 
-- **Lesson 05**: Introduction to Dockerfiles - Creating your first image
-- **Lesson 06**: Dockerfile Instructions - FROM, RUN, COPY, CMD, ENTRYPOINT
-- **Lesson 07**: Layer Caching - Optimizing build times
-- **Lesson 08**: Multi-stage Builds - Creating lean production images
+### Compose & Orchestration
+- [Lesson 04: Compose Advanced Patterns](lesson-04-compose-advanced-patterns.md) - Profiles, healthcheck depends_on, secrets/configs, override files, env var precedence
 
-### Data and Networking
+### Security & Production
+- [Lesson 05: Security Hardening](lesson-05-security-hardening.md) - Non-root user, read-only FS, seccomp, capabilities, secrets management, rootless Docker
+- [Lesson 06: Production Patterns](lesson-06-production-patterns.md) - PID 1/signal handling, health checks, restart policies, resource limits, logging drivers
 
-- **Lesson 09**: Volumes - Persisting and sharing data
-- **Lesson 10**: Bind Mounts - Local development workflows
-- **Lesson 11**: Docker Networking Basics - Container communication
-- **Lesson 12**: Network Types - Bridge, host, and custom networks
+### Debugging
+- [Lesson 08: Debugging & Troubleshooting](lesson-08-debugging-and-troubleshooting.md) - docker inspect, nsenter, layer analysis, stats, common failure patterns
 
-### Orchestration
+## Target Audience
 
-- **Lesson 13**: Introduction to Docker Compose - Multi-container applications
-- **Lesson 14**: Compose File Structure - Services, networks, volumes
-- **Lesson 15**: Development Environments - Hot reload and debugging
-- **Lesson 16**: Production Compose - Environment variables and secrets
+Developers with 2+ years of Docker experience who need a focused refresher covering:
 
-### Advanced Topics
+- What you might have forgotten or never dug into deeply
+- Interview-critical internals (how Docker actually works)
+- Production edge cases and gotchas
+- Security and hardening patterns expected at senior level
 
-- **Lesson 17**: Container Security - Best practices and hardening
-- **Lesson 18**: Health Checks - Monitoring container health
-- **Lesson 19**: Resource Limits - CPU and memory constraints
-- **Lesson 20**: Docker Registry - Publishing and sharing images
-
-### Real-World Projects
-
-- **Lesson 21**: Full-Stack Application - React + Node.js + PostgreSQL
-- **Lesson 22**: Microservices Architecture - Multiple services with Compose
-- **Lesson 23**: CI/CD Integration - Building and deploying with Docker
-- **Lesson 24**: Production Deployment - Best practices and optimization
-
-## How to Use This Curriculum
+## Usage
 
 Each lesson includes:
 
-- **Concepts**: Theory and explanations
-- **Hands-on Exercises**: Practical tasks to build muscle memory
-- **Challenges**: Test your understanding
-- **Solutions**: Reference implementations
-
-## Prerequisites
-
-- Docker installed (you have version 28.5.1 ✓)
-- Basic command-line knowledge
-- Curiosity and willingness to experiment!
-
-## Progress Tracking
-
-- [x] Lesson 01 - Docker Fundamentals
-- [x] Lesson 02 - Images vs Containers
-- [ ] Lesson 03 - Running Your First Container
-- [ ] Lesson 04 - Docker CLI Essentials
-- [ ] Lesson 05 - Introduction to Dockerfiles
-- [ ] Lesson 06 - Dockerfile Instructions
-- [ ] Lesson 07 - Layer Caching
-- [ ] Lesson 08 - Multi-stage Builds
-- [ ] Lesson 09 - Volumes
-- [ ] Lesson 10 - Bind Mounts
-- [ ] Lesson 11 - Docker Networking Basics
-- [ ] Lesson 12 - Network Types
-- [ ] Lesson 13 - Introduction to Docker Compose
-- [ ] Lesson 14 - Compose File Structure
-- [ ] Lesson 15 - Development Environments
-- [ ] Lesson 16 - Production Compose
-- [ ] Lesson 17 - Container Security
-- [ ] Lesson 18 - Health Checks
-- [ ] Lesson 19 - Resource Limits
-- [ ] Lesson 20 - Docker Registry
-- [ ] Lesson 21 - Full-Stack Application
-- [ ] Lesson 22 - Microservices Architecture
-- [ ] Lesson 23 - CI/CD Integration
-- [ ] Lesson 24 - Production Deployment
-
-Let's start learning Docker! 🐳
+- Quick reference tables for fast lookup
+- Code examples annotated with ✓ (correct) and ❌ (wrong)
+- Interview questions with collapsible answers
+- Hands-on exercises with collapsible solutions
+- Key takeaways for last-minute review

@@ -20,6 +20,8 @@ A focused, senior-level refresher for developers with 2+ years of Docker experie
 ### Security & Production
 - [Lesson 05: Security Hardening](lesson-05-security-hardening.md) - Non-root user, read-only FS, seccomp, capabilities, secrets management, rootless Docker
 - [Lesson 06: Production Patterns](lesson-06-production-patterns.md) - PID 1/signal handling, health checks, restart policies, resource limits, logging drivers
+- [Lesson 09: Exec Form, Shell Form, and PID 1](lesson-09-exec-form-shell-form-and-pid1.md) - execve() internals, shell parsing pipeline, signal delivery, SIGKILL timeout, exec entrypoint pattern
+- [Lesson 10: ARG and ENV](lesson-10-arg-and-env.md) - Build-time vs runtime variables, scope rules, multi-stage ARG inheritance, cache invalidation, secret leaks
 
 ### Debugging
 - [Lesson 08: Debugging & Troubleshooting](lesson-08-debugging-and-troubleshooting.md) - docker inspect, nsenter, layer analysis, stats, common failure patterns
